@@ -1,0 +1,1398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Systemised Operations for Digital Product Development</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f8fafc;color:#1a1a1a}
+#app{display:flex;flex-direction:column;height:100vh}
+.header{background:#000;color:#fff;padding:16px 32px;display:flex;align-items:center;gap:24px;height:60px;flex-shrink:0}
+.header h1{font-size:20px;font-weight:700}
+.header .sub{font-size:13px;opacity:.7;margin-top:2px}
+.header-tabs{display:flex;gap:4px;background:rgba(255,255,255,.06);padding:4px;border-radius:8px}
+.header-logo{margin-left:auto;display:flex;align-items:center}
+.header-logo svg{height:20px;width:auto}
+.version-badge{font-size:11px;font-weight:700;letter-spacing:.08em;padding:3px 9px;border-radius:4px;background:rgba(255,255,255,.15);color:rgba(255,255,255,.85);border:1px solid rgba(255,255,255,.25);font-family:monospace}
+.btn{padding:6px 14px;border-radius:6px;border:1px solid #d1d5db;background:#fff;font-size:12px;cursor:pointer;transition:all .15s}
+.btn:hover{background:#f1f5f9}
+.btn.active{background:#000;color:#fff;border-color:#000}
+.tab-btn{padding:7px 16px;border-radius:6px;border:none;background:transparent;color:rgba(255,255,255,.5);font-size:13px;font-weight:600;cursor:pointer;transition:all .15s}
+.tab-btn:hover{background:rgba(255,255,255,.1);color:rgba(255,255,255,.85)}
+.tab-btn.active{background:rgba(255,255,255,.15);color:#fff}
+.main{display:flex;flex:1;overflow:hidden}
+.sidebar{width:300px;border-right:1px solid #e2e8f0;overflow-y:auto;background:#fff;flex-shrink:0}
+.sidebar .group-header{padding:16px 16px 4px;font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.08em;cursor:default;border-bottom:none;margin-top:4px}
+.sidebar .group-header:first-child{margin-top:0}
+.sidebar h3{padding:8px 16px;font-size:13px;color:#1a1a1a;letter-spacing:0;border-bottom:1px solid #f1f5f9;cursor:pointer;display:flex;align-items:center;justify-content:space-between;user-select:none}
+.sidebar h3:hover{background:#f8fafc}
+.sidebar h3 .chevron{font-size:10px;transition:transform .15s;color:#94a3b8}
+.badge.external{background:#e0f2fe;color:#0369a1;font-size:10px}
+.badge.internal{background:#f0fdf4;color:#166534;font-size:10px}
+.shared-badge{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:600;background:#faf5ff;color:#7c3aed;margin-left:6px}
+.sidebar-item{padding:8px 16px;cursor:pointer;display:flex;align-items:center;gap:8px;font-size:13px;border-bottom:1px solid #f8fafc;transition:background .1s}
+.sidebar-item:hover{background:#f1f5f9}
+.sidebar-item.selected{background:#eef2ff;border-left:3px solid #1e2761}
+.sidebar-item .icon{display:none}
+.sidebar-item .name{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sidebar-item .count{font-size:11px;color:#94a3b8;background:#f1f5f9;padding:2px 6px;border-radius:4px}
+.canvas{flex:1;overflow:auto;padding:32px;position:relative}
+.detail-panel{background:#fff;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,.1);padding:24px;max-width:800px}
+.detail-panel h2{font-size:20px;margin-bottom:4px;display:flex;align-items:center;gap:8px}
+.detail-panel .subtitle{color:#64748b;font-size:13px;margin-bottom:16px}
+.detail-panel .description{color:#334155;font-size:14px;line-height:1.6;margin-bottom:16px}
+.section-label{font-size:12px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:.05em;margin:16px 0 8px}
+.dep-list{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.dep-chip{padding:4px 10px;border-radius:6px;font-size:12px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:4px}
+.dep-chip:hover{transform:translateY(-1px);box-shadow:0 2px 4px rgba(0,0,0,.1)}
+.dep-chip.specialist{background:#fef3c7;color:#92400e;border:1px solid #fcd34d}
+.dep-chip.tool{background:#e0f2fe;color:#0369a1;border:1px solid #7dd3fc}
+.dep-chip.knowledge{background:#f0fdf4;color:#166534;border:1px solid #86efac}
+.dep-chip.shared{background:#faf5ff;color:#7c3aed;border:1px solid #c4b5fd}
+.dep-chip.playbook{background:#fff7ed;color:#c2410c;border:1px solid #fdba74}
+.dep-chip.tooldep{background:#e0f2fe;color:#0369a1;border:2px dashed #7dd3fc}
+.sub-agent-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px;margin-bottom:12px}
+.sub-agent-card{padding:8px 12px;border-radius:8px;background:#f8fafc;border:1px solid #e2e8f0;font-size:12px}
+.sub-agent-card .sa-title{font-weight:600;display:flex;align-items:center;gap:4px;margin-bottom:2px}
+.sub-agent-card .sa-desc{color:#64748b;font-size:11px;line-height:1.4}
+.kb-items{display:flex;flex-wrap:wrap;gap:4px}
+.kb-item{padding:3px 8px;background:#f1f5f9;border-radius:4px;font-size:11px;color:#475569}
+.empty-state{text-align:center;padding:80px 32px;color:#94a3b8}
+.empty-state h3{font-size:18px;margin-bottom:8px}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600}
+.badge.human{background:#ede9fe;color:#7c3aed}
+.badge.agent{background:#e0f2fe;color:#0369a1}
+.badge.dual{background:#fef3c7;color:#92400e}
+.deps-from{margin-top:16px}
+.deps-from .section-label{color:#94a3b8}
+@media(max-width:768px){.main{flex-direction:column;flex:1}.sidebar{width:100%;max-height:40vh;border-right:none;border-bottom:1px solid #e2e8f0}}
+.view-sep{display:inline-block;width:1px;height:18px;background:#e2e8f0;margin:0 8px;vertical-align:middle}
+.process-outer{flex:1;overflow:auto;background:#f8fafc;padding:24px 0 0 0}
+.process-table{border-collapse:collapse;font-size:12px}
+.process-table th,.process-table td{border:1px solid #e2e8f0;padding:10px 12px;vertical-align:top}
+.pt-phase-header{color:#fff;text-align:center;font-weight:700;font-size:13px;position:sticky;top:0;z-index:10;min-width:200px}
+.pt-corner{position:sticky;top:0;left:0;z-index:20;background:#f8fafc;width:160px;min-width:160px;border:1px solid #e2e8f0 !important}
+.pt-row-label{background:#fff !important;font-weight:700;font-size:12px;color:#1a1a1a;position:sticky;left:0;z-index:5;width:160px;min-width:160px;white-space:nowrap;cursor:pointer;user-select:none;border-right:2px solid #e2e8f0 !important;transition:background .1s}
+.pt-row-label-content{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.pt-row-label:hover{background:#f1f5f9 !important}
+.pt-row-label .chevron{font-size:10px;color:#94a3b8;flex-shrink:0}
+.pt-row-label.collapsed{background:#f8fafc !important;color:#64748b;font-weight:600}
+.pt-row-collapsed-filler{background:#f8fafc;border:1px solid #e2e8f0}
+.pt-cell-text{color:#334155;line-height:1.5;font-size:12px;margin:0 0 4px}
+.pt-cell-items{margin:0;padding:0 0 0 14px;color:#334155;line-height:1.65;font-size:12px}
+.pt-cell-items li{margin-bottom:2px}
+.pt-phase-header{cursor:pointer;user-select:none}
+.pt-phase-header:hover{opacity:.85}
+.pt-collapsed-header{background:#475569;color:#fff;width:32px;min-width:32px;max-width:32px;cursor:pointer;user-select:none;position:sticky;top:0;z-index:10;padding:0;border:1px solid #e2e8f0}
+.pt-collapsed-header:hover{opacity:.85}
+.pt-collapsed-label{writing-mode:vertical-rl;text-orientation:mixed;transform:rotate(180deg);font-weight:700;font-size:12px;padding:12px 4px;white-space:nowrap}
+.pt-collapsed-cell{width:32px;min-width:32px;max-width:32px;background:#f1f5f9;border:1px solid #e2e8f0}
+.page-footer{padding:12px 32px;background:#f8fafc;border-top:1px solid #e2e8f0;display:flex;gap:16px;align-items:center;font-size:11px;color:#94a3b8;flex-shrink:0}
+.page-footer a{color:#64748b;text-decoration:none;transition:color .15s}
+.page-footer a:hover{color:#1e2761;text-decoration:underline}
+.page-footer .sep{width:1px;height:12px;background:#e2e8f0}
+.maturity-badge{display:inline-flex;align-items:center;padding:2px 6px;border-radius:3px;font-size:9px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;margin-left:6px}
+.maturity-badge.production{background:#f0fdf4;color:#166534}
+.maturity-badge.first-version{background:#eff6ff;color:#1e40af}
+.maturity-badge.poc{background:#fef3c7;color:#92400e}
+.maturity-badge.explored{background:#faf5ff;color:#7c3aed}
+.maturity-badge.concept{background:#f1f5f9;color:#64748b}
+.domain-tag{display:inline-flex;align-items:center;padding:2px 7px;border-radius:3px;font-size:10px;font-weight:500;background:#f1f5f9;color:#475569;margin-left:6px}
+/* Search */
+.search-bar{padding:16px 32px 0;position:relative;max-width:400px;flex-shrink:0}
+.search-input-wrap{position:relative;display:flex;align-items:center}
+.search-input-wrap input{width:100%;padding:8px 32px 8px 32px;border:1px solid #e2e8f0;border-radius:8px;font-size:13px;background:#fff;outline:none;transition:border .15s,box-shadow .15s}
+.search-input-wrap input:focus{border-color:#000;box-shadow:0 0 0 3px rgba(0,0,0,.06)}
+.search-input-wrap input::placeholder{color:#94a3b8}
+.search-icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);width:14px;height:14px;pointer-events:none}
+.search-icon::before{content:'';display:block;width:10px;height:10px;border:2px solid #94a3b8;border-radius:50%}
+.search-icon::after{content:'';display:block;width:6px;height:2px;background:#94a3b8;transform:rotate(45deg);position:relative;top:-2px;left:9px}
+.search-clear{position:absolute;right:6px;top:50%;transform:translateY(-50%);background:none;border:none;color:#94a3b8;cursor:pointer;font-size:16px;line-height:1;padding:2px 4px;border-radius:4px;display:none}
+.search-clear:hover{color:#475569;background:#f1f5f9}
+.search-dropdown{position:absolute;top:100%;left:0;right:0;max-height:400px;overflow-y:auto;background:#fff;border:1px solid #e2e8f0;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:50;margin-top:4px;display:none}
+.search-dropdown.open{display:block}
+.search-group-label{padding:8px 12px 4px;font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.08em;background:#f8fafc;position:sticky;top:0}
+.search-result{padding:8px 12px;cursor:pointer;display:flex;flex-direction:column;gap:1px;border-bottom:1px solid #f8fafc;transition:background .1s}
+.search-result:hover,.search-result.active{background:#eef2ff}
+.search-result .sr-title{font-size:13px;font-weight:500;color:#1a1a1a}
+.search-result .sr-title mark{background:#fef08a;color:inherit;border-radius:2px;padding:0 1px}
+.search-result .sr-context{font-size:11px;color:#94a3b8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.search-result .sr-context mark{background:#fef08a;color:#64748b;border-radius:2px;padding:0 1px}
+.search-empty{padding:16px 12px;text-align:center;color:#94a3b8;font-size:13px}
+.search-hint{padding:8px 12px;font-size:11px;color:#94a3b8;text-align:center;border-top:1px solid #f1f5f9}
+/* Architecture Map */
+.map-outer{overflow-y:auto;flex:1;background:#f8fafc;padding:32px 32px 0}
+.map-picker{max-width:1200px;margin:0 auto}
+.map-picker-title{font-size:26px;font-weight:700;color:#1a1a1a;text-align:center;margin-bottom:4px}
+.map-picker-subtitle{font-size:14px;color:#64748b;text-align:center;margin-bottom:32px}
+.map-picker-stages{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:16px;margin-bottom:28px}
+.map-picker-stage{}
+.map-picker-header{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;padding:7px 12px;border-radius:8px;color:#fff;text-align:center;margin-bottom:10px}
+.map-picker-card{padding:12px 14px;border-radius:8px;background:#fff;border:1px solid #e2e8f0;cursor:pointer;transition:all .2s;margin-bottom:8px;position:relative}
+.map-picker-card:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,.1);border-color:#cbd5e1}
+.map-picker-card .pc-title{font-size:12px;font-weight:600;color:#1a1a1a;line-height:1.3}
+.map-picker-card .pc-domain{font-size:10px;color:#94a3b8;margin-top:3px;line-height:1.3}
+.map-picker-card .pc-accent{position:absolute;top:0;left:0;width:4px;height:100%;border-radius:10px 0 0 10px}
+.map-crosscut{margin-top:8px;padding-top:20px;border-top:2px dashed #cbd5e1}
+.map-crosscut-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#64748b;text-align:center;margin-bottom:12px}
+.map-crosscut-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
+.map-flow{max-width:900px;margin:0 auto;padding-bottom:48px}
+.map-back-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;border:1px solid #e2e8f0;background:#fff;font-size:13px;font-weight:500;color:#475569;cursor:pointer;transition:all .15s;margin-bottom:24px}
+.map-back-btn:hover{background:#f1f5f9;color:#1e2761;border-color:#cbd5e1}
+.map-flow-band{margin-bottom:0;text-align:center}
+.map-flow-band-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#64748b;margin-bottom:8px}
+.map-flow-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;padding:16px 20px;border-radius:12px}
+.map-flow-card{padding:12px 16px;border-radius:10px;background:#fff;border:1px solid #e2e8f0;cursor:pointer;transition:all .2s;text-align:left;display:flex;flex-direction:column}
+.map-flow-card:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,.08);border-color:#cbd5e1}
+.map-flow-card .fc-title{font-size:12px;font-weight:600;color:#1a1a1a;line-height:1.3}
+.map-flow-card .fc-sub{font-size:10px;color:#64748b;margin-top:3px;line-height:1.3;flex:1}
+.map-flow-card.fc-expanded{border-color:#000;box-shadow:0 4px 16px rgba(0,0,0,.1);grid-column:span 2}
+.map-flow-card .fc-detail{display:none;margin-top:8px;padding-top:8px;border-top:1px solid #e2e8f0;font-size:12px;color:#475569;line-height:1.5}
+.map-flow-card.fc-expanded .fc-detail{display:block}
+.map-flow-card .fc-detail-chips{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.map-flow-card .fc-detail-chip{padding:2px 8px;border-radius:4px;font-size:10px;font-weight:500;background:#f1f5f9;color:#475569}
+.map-flow-card-expanded{padding:20px 24px;border-radius:14px;background:#fff;border:2px solid #1e2761;box-shadow:0 4px 20px rgba(30,39,97,.12);text-align:left}
+.map-flow-card-expanded .fce-title{font-size:20px;font-weight:700;color:#1a1a1a;margin-bottom:6px}
+.map-flow-card-expanded .fce-desc{font-size:14px;color:#475569;line-height:1.6}
+.map-flow-card-expanded .fce-domain{font-size:11px;color:#94a3b8;margin-top:6px;font-weight:500}
+.map-flow-connector{display:flex;flex-direction:column;align-items:center;padding:6px 0}
+.map-flow-connector .connector-line{width:2px;height:12px;background:#cbd5e1}
+.map-flow-connector .connector-text{font-size:11px;color:#94a3b8;font-style:italic;padding:2px 0}
+@media(max-width:960px){.map-picker-stages{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:768px){.map-picker-stages{grid-template-columns:1fr 1fr}.map-crosscut-grid{grid-template-columns:1fr}.map-flow-cards{grid-template-columns:1fr}.map-outer{padding:16px}}
+@media(max-width:480px){.map-picker-stages{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script src="data.js"></script>
+<script>
+const VERSION = 'PA03';
+
+const PROCESS_DATA = {
+  rows:[
+    {key:'challenges',label:'Challenges'},
+    {key:'objective',label:'Objective'},
+    {key:'context',label:'Context'},
+    {key:'resources',label:'Resources'},
+    {key:'activities',label:'Activities'},
+    {key:'inputs',label:'Inputs'},
+    {key:'outputs',label:'Outputs'}
+  ],
+  phases:[
+    {
+      id:'capture',title:'Capture',icon:'🔍',headerColor:'#312e81',bgColor:'#f5f3ff',
+      objective:'Identify meaningful opportunities with potential user and brand impact early in the process.',
+      horizon:'Later',focus:'Identify Opportunity',
+      activities:['Stakeholder mapping','Market and competitor analysis','Data analytics review','Discovery workshops and journey mapping','Prioritisation based on user impact, business value, and feasibility'],
+      inputs:['Customer insights and feedback','Existing analytics and usage patterns','Business needs and strategic goals','Tech limitations and platform capabilities','Top management directives'],
+      outputs:['Opportunity areas','Customer pain points','Initial hypotheses and assumptions','Strategic fit and stakeholder interest'],
+      resources:['Product Vision','Research Framework','Digital Experience Strategy'],
+      context:{text:'Identify opportunities rooted in user need, market signal, or platform/foundation.',items:['Helps avoid local solutions to global problems','Reduces backlog noise by anchoring ideas in evidence','Gives teams a place to flag UX, UI, and brand opportunities early']},
+      challenges:['UX/UI concerns discovered too late','Backlog items not prioritised from a user or design quality perspective','Fragmented insight stored in private folders/files','Underutilisation of data, insights and knowledge when planning and scoping','Unclear documentation']
+    },
+    {
+      id:'define',title:'Define',icon:'📌',headerColor:'#1e40af',bgColor:'#eff6ff',
+      objective:'Understand the problem in full by combining user research, system insight, and branch/UX evaluation.',
+      horizon:'Later',focus:'Problem Research \u2192 Problem Definition',
+      activities:['Cross-functional alignment on product scope and goals','User interviews and feedback collection','Setting user personas and customer journeys','Defining success metrics','Prioritise features'],
+      inputs:['Findings from research','User personas','Business frameworks (e.g. Digital Experience Strategy)','Roadmap dependencies'],
+      outputs:['Clear product vision and scope','Business cases and success metrics','Defined problem statements and vision','Hypotheses','Personas','Customer journeys','Prioritised backlog'],
+      resources:['UX Toolbox \u2013 User research','UX Toolbox \u2013 Generative insight'],
+      context:{text:'Validate and understand the problem from every angle \u2014 user, system, context, and experience.',items:['Helps cross-functional teams avoid jumping to solutions for symptoms','Surfaces customer problems with platform/system limitations','Gives teams visibility of experience inconsistencies and visual debt early']},
+      challenges:['Over-focus on backend/system constraints at cost of user experience','No shared visibility on pain points between teams','Misalignment between business goals and tech feasibility','Limited access to usability data and insights']
+    },
+    {
+      id:'design',title:'Design',icon:'🎨',headerColor:'#0e7490',bgColor:'#ecfeff',
+      objective:'Create feasible, testable solutions that reflect real needs, enable performance, and align with brand and design system standards.',
+      horizon:'Transition',focus:'Solution Design',
+      activities:['Co-ideation sessions and iteration (product, tech, design)','Wireframing and prototyping','UX research and usability testing','Collaboration with developers on feasibility','Design System compliance check','Validate concepts'],
+      inputs:['Personas and user needs','Problem statements','Customer journeys'],
+      outputs:['Validated design prototypes and flows','Design specifications and handover','Updated design backlog','User stories'],
+      resources:['Design System','Design System Assistant','Brand Portal','UI Resources','Design Principles & Best Practices'],
+      context:{text:'Create design-system-aligned, scalable, and accessible solutions that are testable, feasible and strengthen brand positioning.',items:['Avoids rework by aligning design with tech early','Makes brand and accessibility requirements part of the process \u2014 not a late-stage fix','Supports scalability by reinforcing consistent patterns']},
+      challenges:['Access to users to validate solutions','Custom or non-scalable design','Poor developer handoff','Inconsistent implementation of design system']
+    },
+    {
+      id:'develop',title:'Develop',icon:'\u2699\uFE0F',headerColor:'#166534',bgColor:'#f0fdf4',
+      objective:'Support implementation, ensure design matches the spec, and validate accessibility, usability and brand compliance.',
+      horizon:'Now',focus:'Solution Engineering',
+      activities:['Agile development','UI/UX refinement in close sync with implementation','Continuous validation and usability testing','Integration testing and QA','Alignment with DQS'],
+      inputs:['User stories','Design specifications','Technical requirements','Development plan'],
+      outputs:['Production-ready features','Test coverage and reports','Monitoring plan'],
+      resources:['Code Repository','Component Storybook','Demo Environment','Digital Quality Standards'],
+      context:{text:'Build and test solutions that meet agreed expectations \u2014 from system logic to usability to brand.',items:['Bridges the gap between design intent and code output','Makes testing for performance, UX, and brand part of the process','Ensures accessibility, coherence and brand compliance before going live']},
+      challenges:['Design intent lost during implementation','Brand or accessibility gaps at handoff','Inconsistent feedback loops','Unclear or incomplete requirements']
+    },
+    {
+      id:'release',title:'Release',icon:'\uD83D\uDE80',headerColor:'#92400e',bgColor:'#fff7ed',
+      objective:'Review brand expression, accessibility, and usability in real user contexts.',
+      horizon:'Now',focus:'Viable Solution',
+      activities:['Final QA and bug fixes','Release go-live plan','Performance monitoring','Stakeholder demos'],
+      inputs:['Test results','Design criteria','Stakeholder sign-off','Monitoring and analytics'],
+      outputs:['Live product/feature','User adoption metrics','Analytics/feedback data','Documentation'],
+      resources:['Digital Quality Standards','Analytics Platform'],
+      context:{text:'Launch with intention. Observe user behaviour. Gather feedback to drive the next step.',items:['Promotes cross-functional responsibility for the experience after release','Gives insight into how brand, usability, and performance hold up in production','Closes the feedback loop between market and product teams']},
+      challenges:['Visual bugs discovered late','No system for feeding live learnings back to design','Data collection under-utilised or not analysed effectively']
+    },
+    {
+      id:'refine',title:'Refine',icon:'\uD83D\uDD01',headerColor:'#6b21a8',bgColor:'#faf5ff',
+      objective:'Update, document and evolve design quality, accessibility, and scale.',
+      horizon:'Next',focus:'Rollout & continuously improve',
+      activities:['Post-release retrospective and monitoring','Analysing user behaviour and feedback','UX/UI refinement cycles','Collecting and tracking insights','Documentation updates','Tools, mentoring, patterns'],
+      inputs:['Feedback loops','Live usage data','Performance metrics','Error logs'],
+      outputs:['Updated backlog','Refined user journeys','Improved quality scores','Research and insight repositories','Actionable insights for next iterations'],
+      resources:['Digital Quality Standards','Analytics Platform'],
+      context:{text:'Update what has been built, evolve systems, and share what has been learned.',items:['Helps align good decisions across teams and markets','Prevents teams from repeating the same problems','Promotes shared design systems and delivery patterns']},
+      challenges:['Teams repeating known visual problems','No shared ownership of design quality','Valuable insights not retained or shared','Lack of consistent practice and toolset usage','Varying data across practices and teams']
+    }
+  ]
+};
+
+/* DATA loaded from data.js via script tag */
+const app = document.getElementById('app');
+let selectedId = null;
+let viewMode = 'map';
+const expandedCategories = new Set();
+let mapSelectedCap = null;
+let mapExpandedCard = null;
+let searchQuery = '';
+let searchActiveIdx = -1;
+let searchResults = [];
+
+function buildSearchIndex() {
+  const idx = [];
+  DATA.capabilities.forEach(c => idx.push({id:c.id, navId:c.id, type:'Capability', title:c.title, text:(c.description||'')+' '+(c.domain||'')}));
+  DATA.playbooks.forEach(p => idx.push({id:p.id, navId:'pb-'+p.id, type:'Playbook', title:p.title, text:(p.description||'')+' '+(p.phases||[]).join(' ')}));
+  DATA.knowledgeAssets.forEach(k => idx.push({id:k.id, navId:k.id, type:'Knowledge Asset', title:k.title, text:(k.description||'')+' '+(k.format||'')+' '+(k.owner||'')}));
+  DATA.aiAgents.forEach(a => idx.push({id:a.id, navId:'agent-'+a.id, type:'AI Agent', title:a.title, text:(a.subtitle||'')+' '+(a.definitionOfDone||'')}));
+  DATA.skills.forEach(s => idx.push({id:s.id, navId:'skill-'+s.id, type:'Skill', title:s.title, text:(s.subtitle||'')+' '+(s.description||'')}));
+  DATA.realtools.forEach(t => idx.push({id:t.id, navId:'realtool-'+t.id, type:'Tool', title:t.title, text:(t.subtitle||'')+' '+(t.description||'')}));
+  DATA.guidelines.forEach(g => idx.push({id:g.id, navId:'guideline-'+g.id, type:'Guideline', title:g.title, text:(g.items||[]).map(i => typeof i==='string'?i:i.title||'').join(' ')}));
+  DATA.policies.forEach(p => idx.push({id:p.id, navId:'policy-'+p.id, type:'Policy', title:p.title, text:(p.subtitle||'')+' '+(p.description||'')}));
+  DATA.guardrails.forEach(g => idx.push({id:g.id, navId:'guardrail-'+g.id, type:'Guardrail', title:g.title, text:(g.subtitle||'')+' '+(g.description||'')}));
+  DATA.infrastructure.forEach(i => idx.push({id:i.id, navId:'infra-'+i.id, type:'Infrastructure', title:i.title, text:(i.subtitle||'')+' '+(i.concept||'')+' '+(i.description||'')}));
+  // Pre-compute lowercase
+  idx.forEach(e => { e._title = e.title.toLowerCase(); e._text = e.text.toLowerCase(); });
+  return idx;
+}
+const SEARCH_INDEX = buildSearchIndex();
+
+function searchEntities(query) {
+  if (!query || query.length < 2) return [];
+  const terms = query.toLowerCase().split(/\s+/).filter(Boolean);
+  const scored = [];
+  SEARCH_INDEX.forEach(entry => {
+    let score = 0;
+    let allMatch = true;
+    for (const t of terms) {
+      const inTitle = entry._title.includes(t);
+      const inText = entry._text.includes(t);
+      if (!inTitle && !inText) { allMatch = false; break; }
+      if (inTitle) score += 10;
+      if (entry._title.startsWith(t)) score += 5;
+      if (inText) score += 1;
+    }
+    if (allMatch) scored.push({entry, score});
+  });
+  scored.sort((a,b) => b.score - a.score);
+  return scored.slice(0, 20).map(s => s.entry);
+}
+
+function highlightMatch(text, query) {
+  if (!query || query.length < 2) return esc(text);
+  const terms = query.toLowerCase().split(/\s+/).filter(Boolean);
+  let result = esc(text);
+  terms.forEach(t => {
+    const re = new RegExp('(' + t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+    result = result.replace(re, '<mark>$1</mark>');
+  });
+  return result;
+}
+
+function findContextSnippet(text, query) {
+  if (!text || !query) return '';
+  const terms = query.toLowerCase().split(/\s+/).filter(Boolean);
+  const lower = text.toLowerCase();
+  for (const t of terms) {
+    const idx = lower.indexOf(t);
+    if (idx >= 0) {
+      const start = Math.max(0, idx - 20);
+      const end = Math.min(text.length, idx + t.length + 40);
+      return (start > 0 ? '…' : '') + text.slice(start, end) + (end < text.length ? '…' : '');
+    }
+  }
+  return text.length > 60 ? text.slice(0,60) + '…' : text;
+}
+const visibleRows = new Set(PROCESS_DATA.rows.map(r => r.key));
+const visiblePhases = new Set(PROCESS_DATA.phases.map(p => p.id));
+
+function render() {
+  let body;
+  const footer = renderFooter();
+  if (viewMode === 'process') {
+    body = '<div class="main">' + renderProcessView() + '</div>' + footer;
+  } else if (viewMode === 'map') {
+    body = renderMapView() + footer;
+  } else {
+    body = '<div class="main">' + renderSidebar() + renderCanvas() + '</div>' + footer;
+  }
+  app.innerHTML = renderHeader() + body;
+  bindEvents();
+}
+
+function renderHeader() {
+  let html = '<div class="header">';
+  html += '<div class="header-tabs">';
+  html += '<button class="tab-btn' + (viewMode === 'map' ? ' active' : '') + '" data-view="map">Work Chart</button>';
+  html += '<button class="tab-btn' + (viewMode === 'process' ? ' active' : '') + '" data-view="process">Process View</button>';
+  html += '</div>';
+  html += '<div class="header-logo"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 511.88 164.53"><path fill="#fff" d="M0,3.39h97.41v30.74h-63.51v32.77h55.6v28.02h-55.6v35.93h63.51v30.74H0V3.39Z"/><path fill="#fff" d="M109.16,18.76c0-10.17,8.14-18.76,18.53-18.76s18.98,8.59,18.98,18.76-8.59,18.76-18.98,18.76-18.53-8.36-18.53-18.76ZM111.64,49.49h32.54v112.09h-32.54V49.49Z"/><path fill="#fff" d="M155.26,105.54c0-34.13,24.86-58.99,54.92-58.99,15.14,0,28.25,6.1,36.16,17.63V3.39h32.54v158.2h-32.54v-14.69c-7.23,11.53-21.02,17.63-36.16,17.63-30.06,0-54.92-24.86-54.92-58.99ZM246.79,105.32c0-16.72-12.88-30.06-29.38-30.06s-29.15,13.33-29.15,30.28,12.88,30.28,29.15,30.28,29.38-13.56,29.38-30.51Z"/><path fill="#fff" d="M293.8,49.49h32.54v19.66c5.88-13.11,16.5-19.66,33-19.66h24.86v30.28h-27.35c-19.66,0-30.51,11.3-30.51,31.64v50.17h-32.54V49.49Z"/><path fill="#fff" d="M388.26,105.54c0-34.13,24.86-58.99,54.92-58.99,14.92,0,28.25,6.1,36.16,17.63v-14.69h32.54v112.09h-32.54v-14.69c-7.23,11.53-21.24,17.63-36.16,17.63-30.06,0-54.92-24.86-54.92-58.99ZM479.79,105.32c0-16.72-12.88-30.06-29.38-30.06s-29.15,13.33-29.15,30.28,12.88,30.28,29.15,30.28,29.38-13.56,29.38-30.51Z"/></svg></div>';
+  html += '</div>';
+  return html;
+}
+
+function renderFooter() {
+  return '<div class="page-footer">'
+    + '<a href="#" data-view="studio" class="footer-fi-link">Functions Inventory</a>'
+    + '<div class="sep"></div>'
+    + '<a href="glossary.html">Glossary</a>'
+    + '</div>';
+}
+
+function renderSearchBar() {
+  let html = '<div class="search-bar">';
+  html += '<div class="search-input-wrap">';
+  html += '<span class="search-icon"></span>';
+  html += '<input type="text" id="fi-search" placeholder="Search functions…" value="' + esc(searchQuery) + '" autocomplete="off" />';
+  html += '<button class="search-clear" id="fi-search-clear" style="' + (searchQuery ? 'display:block' : 'display:none') + '">&times;</button>';
+  html += '</div>';
+  html += '<div class="search-dropdown' + (searchResults.length > 0 || (searchQuery.length >= 2) ? ' open' : '') + '" id="fi-search-dropdown">';
+  if (searchQuery.length >= 2) {
+    if (searchResults.length === 0) {
+      html += '<div class="search-empty">No results for &ldquo;' + esc(searchQuery) + '&rdquo;</div>';
+    } else {
+      let lastType = '';
+      searchResults.forEach((r, i) => {
+        if (r.type !== lastType) {
+          html += '<div class="search-group-label">' + esc(r.type) + '</div>';
+          lastType = r.type;
+        }
+        const active = i === searchActiveIdx ? ' active' : '';
+        html += '<div class="search-result' + active + '" data-search-nav="' + r.navId + '" data-search-idx="' + i + '">';
+        html += '<div class="sr-title">' + highlightMatch(r.title, searchQuery) + '</div>';
+        const snippet = findContextSnippet(r.text.trim(), searchQuery);
+        if (snippet) html += '<div class="sr-context">' + highlightMatch(snippet, searchQuery) + '</div>';
+        html += '</div>';
+      });
+      html += '<div class="search-hint">' + searchResults.length + ' result' + (searchResults.length !== 1 ? 's' : '') + ' &middot; ↑↓ navigate &middot; Enter select &middot; Esc close</div>';
+    }
+  }
+  html += '</div>';
+  html += '</div>';
+  return html;
+}
+
+function renderSidebar() {
+  let html = '<div class="sidebar">';
+  // Capability categories grouped by lifecycle stage
+  const stageOrder = ['discover','build','run','evolve','migrate','sunset','cross-cutting'];
+  const stageCats = stageOrder.map(sId => {
+    const stage = DATA.lifecycleStages.find(s => s.id === sId);
+    const label = stage ? stage.title : 'Cross-cutting';
+    const items = DATA.capabilities.filter(c => c.stage === sId);
+    return { key: 'cap-' + sId, label: label, items: items, prefix: '' };
+  }).filter(c => c.items.length > 0);
+
+  const groups = [
+    { header: 'Capabilities', categories: stageCats },
+    { header: 'Operations', categories: [
+      { key: 'playbooks', label: 'Playbooks', items: DATA.playbooks, prefix: 'pb-' },
+      { key: 'knowledgeAssets', label: 'Knowledge Assets', items: DATA.knowledgeAssets, prefix: '' }
+    ]},
+    { header: 'Digital Workforce', categories: [
+      { key: 'aiAgents', label: 'AI Agents', items: DATA.aiAgents, prefix: 'agent-' }
+    ]},
+    { header: 'Rules', categories: [
+      { key: 'policies', label: 'Policies', items: DATA.policies, prefix: 'policy-' },
+      { key: 'guardrails', label: 'Guardrails', items: DATA.guardrails, prefix: 'guardrail-' },
+      { key: 'guidelines', label: 'Guidelines', items: DATA.guidelines, prefix: 'guideline-' }
+    ]},
+    { header: 'Execution', categories: [
+      { key: 'skills', label: 'Skills', items: DATA.skills, prefix: 'skill-' },
+      { key: 'realtools', label: 'Tools', items: DATA.realtools, prefix: 'realtool-' }
+    ]},
+    { header: 'Infrastructure', categories: [
+      { key: 'orchestration', label: 'Orchestration Engine', items: DATA.infrastructure.filter(x => x.id === 'orchestration-engine'), prefix: 'infra-' },
+      { key: 'stateMemory', label: 'State & Memory', items: DATA.infrastructure.filter(x => x.id === 'state-memory-management'), prefix: 'infra-' },
+      { key: 'runtime', label: 'Runtime Environment', items: DATA.infrastructure.filter(x => x.id === 'runtime-environment'), prefix: 'infra-' }
+    ]}
+  ];
+  groups.forEach(g => {
+    html += '<div class="group-header">' + esc(g.header) + '</div>';
+    g.categories.forEach(cat => {
+      const expanded = expandedCategories.has(cat.key);
+      const chevron = expanded ? '▼' : '▶';
+      html += '<h3 data-toggle="' + cat.key + '"><span>' + cat.label + ' (' + cat.items.length + ')</span><span class="chevron">' + chevron + '</span></h3>';
+      if (expanded) {
+        cat.items.forEach(item => { html += sidebarItem(cat.prefix + item.id, item.title); });
+      }
+    });
+  });
+  return html + '</div>';
+}
+
+function sidebarItem(id, name) {
+  const sel = selectedId === id ? ' selected' : '';
+  return '<div class="sidebar-item' + sel + '" data-id="' + id + '"><span class="name">' + esc(name) + '</span></div>';
+}
+
+function countDeps(id) {
+  return DATA.edges.filter(e => e.from === id || e.to === id).length;
+}
+
+function renderCanvas() {
+  let html = '<div class="canvas">';
+  html += renderSearchBar();
+  if (!selectedId) return html + '</div>';
+
+  const prefix = selectedId.split('-')[0];
+  html += '<div class="detail-panel">';
+
+  if (prefix === 'cap') html += renderCapability();
+  else if (prefix === 'ka') html += renderKnowledgeAsset();
+  else if (prefix === 'agent') html += renderAIAgent();
+  else if (prefix === 'skill') html += renderSkill();
+  else if (prefix === 'guideline') html += renderGuideline();
+  else if (prefix === 'pb') html += renderPlaybook();
+  else if (prefix === 'policy') html += renderPolicy();
+  else if (prefix === 'guardrail') html += renderGuardrail();
+  else if (prefix === 'realtool') html += renderRealTool();
+  else if (prefix === 'infra') html += renderInfrastructure();
+
+  html += renderReverseDeps();
+  html += '</div></div>';
+  return html;
+}
+
+function renderCapability() {
+  const cap = DATA.capabilities.find(x => x.id === selectedId);
+  if (!cap) return '';
+  let html = '<h2>' + esc(cap.title) + '</h2>';
+  html += '<div class="description">' + esc(cap.description) + '</div>';
+  if (cap.playbooks.length) {
+    html += '<div class="section-label">Playbooks (' + cap.playbooks.length + ')</div><div class="dep-list">';
+    cap.playbooks.forEach(pbId => {
+      const pb = DATA.playbooks.find(x => x.id === pbId);
+      html += '<span class="dep-chip playbook" data-nav="pb-' + pbId + '">' + (pb ? esc(pb.title) : pbId) + '</span>';
+    });
+    html += '</div>';
+  }
+  if (cap.keyAgents.length) {
+    html += '<div class="section-label">Key AI Agents (' + cap.keyAgents.length + ')</div><div class="dep-list">';
+    cap.keyAgents.forEach(aId => {
+      const a = DATA.aiAgents.find(x => x.id === aId);
+      html += '<span class="dep-chip specialist" data-nav="agent-' + aId + '">' + (a ? esc(a.title) : aId) + '</span>';
+    });
+    html += '</div>';
+  }
+  if (cap.keySkills.length) {
+    html += '<div class="section-label">Key Skills (' + cap.keySkills.length + ')</div><div class="dep-list">';
+    cap.keySkills.forEach(sId => {
+      const sk = DATA.skills.find(x => x.id === sId);
+      html += '<span class="dep-chip tool" data-nav="skill-' + sId + '">' + (sk ? esc(sk.title) : sId) + '</span>';
+    });
+    html += '</div>';
+  }
+  return html;
+}
+
+function renderKnowledgeAsset() {
+  const ka = DATA.knowledgeAssets.find(x => x.id === selectedId);
+  if (!ka) return '';
+  let html = '<h2>' + esc(ka.title) + '</h2>';
+  html += '<div class="subtitle">' + esc(ka.format) + ' · Owned by ' + esc(ka.owner) + '</div>';
+  html += '<div class="description">' + esc(ka.description) + '</div>';
+  if (ka.relatedCapabilities.length) {
+    html += '<div class="section-label">Related Capabilities (' + ka.relatedCapabilities.length + ')</div><div class="dep-list">';
+    ka.relatedCapabilities.forEach(cId => {
+      const c = DATA.capabilities.find(x => x.id === cId);
+      html += '<span class="dep-chip playbook" data-nav="' + cId + '">' + (c ? esc(c.title) : cId) + '</span>';
+    });
+    html += '</div>';
+  }
+  if (ka.relatedGuidelines.length) {
+    html += '<div class="section-label">Related Guidelines (' + ka.relatedGuidelines.length + ')</div><div class="dep-list">';
+    ka.relatedGuidelines.forEach(gId => {
+      const g = DATA.guidelines.find(x => x.id === gId);
+      html += '<span class="dep-chip knowledge" data-nav="guideline-' + gId + '">' + (g ? esc(g.title) : gId) + '</span>';
+    });
+    html += '</div>';
+  }
+  return html;
+}
+
+function renderAIAgent() {
+  const id = selectedId.replace('agent-', '');
+  const s = DATA.aiAgents.find(x => x.id === id);
+  if (!s) return '';
+  let html = '<h2>' + esc(s.title) + '</h2>';
+  html += '<div class="subtitle">' + esc(s.subtitle||'') + '</div>';
+  if (s.definitionOfDone) html += '<div class="description"><strong>Definition of Done:</strong> ' + esc(s.definitionOfDone) + '</div>';
+
+  const skillIds = s.skillChain || [];
+  if (skillIds.length) {
+    html += '<div class="section-label">Skill Chain (' + skillIds.length + ')</div><div class="dep-list">';
+    skillIds.forEach(sid => {
+      const sk = DATA.skills.find(x => x.id === sid);
+      html += '<span class="dep-chip tool" data-nav="skill-' + sid + '">' + (sk ? esc(sk.title) : sid) + '</span>';
+    });
+    html += '</div>';
+  }
+  return html;
+}
+
+function renderSkill() {
+  const id = selectedId.replace('skill-', '');
+  const t = DATA.skills.find(x => x.id === id);
+  if (!t) return '';
+  const mat = t.maturity || 'production';
+  let html = '<h2>' + esc(t.title) + '<span class="maturity-badge ' + mat + '">' + mat.replace('-', ' ') + '</span></h2>';
+  html += '<div class="subtitle">' + esc(t.subtitle||'') + '</div>';
+  if (t.description) html += '<div class="description">' + esc(t.description) + '</div>';
+
+  const subSkills = t.subSkills || [];
+  if (subSkills.length) {
+    html += '<div class="section-label">Sub-Skills (' + subSkills.length + ')</div><div class="dep-list">';
+    subSkills.forEach(ssId => {
+      const ss = DATA.skills.find(x => x.id === ssId);
+      html += '<span class="dep-chip tool" data-nav="skill-' + ssId + '">' + (ss ? esc(ss.title) : ssId) + '</span>';
+    });
+    html += '</div>';
+  }
+
+  const subs = t.subAgents || [];
+  if (subs.length) {
+    html += '<div class="section-label">Sub-Agents (' + subs.length + ')</div><div class="sub-agent-grid">';
+    subs.forEach(sa => {
+      const shared = sa.sharedAcross || [];
+      html += '<div class="sub-agent-card"><div class="sa-title">' + esc(sa.title);
+      if (shared.length) html += '<span class="shared-badge">Used by ' + (shared.length + 1) + ' Skills</span>';
+      html += '</div>';
+      if (sa.desc) html += '<div class="sa-desc">' + esc(sa.desc) + '</div>';
+      if (sa.description) html += '<div class="sa-desc">' + esc(sa.description) + '</div>';
+      html += '</div>';
+    });
+    html += '</div>';
+  }
+
+  const deps = t.toolDeps || [];
+  if (deps.length) {
+    html += '<div class="section-label">Uses Skills (' + deps.length + ')</div><div class="dep-list">';
+    deps.forEach(did => {
+      const d = DATA.skills.find(x => x.id === did);
+      html += '<span class="dep-chip tooldep" data-nav="skill-' + did + '">' + (d ? esc(d.title) : did) + '</span>';
+    });
+    html += '</div>';
+  }
+
+  const kDeps = t.knowledgeDeps || [];
+  if (kDeps.length) {
+    html += '<div class="section-label">Guideline Dependencies (' + kDeps.length + ')</div><div class="dep-list">';
+    kDeps.forEach(kid => {
+      const k = DATA.guidelines.find(x => x.id === kid);
+      html += '<span class="dep-chip knowledge" data-nav="guideline-' + kid + '">' + (k ? esc(k.title) : kid) + '</span>';
+    });
+    html += '</div>';
+  }
+
+  return html;
+}
+
+function renderGuideline() {
+  const id = selectedId.replace('guideline-', '');
+  const k = DATA.guidelines.find(x => x.id === id);
+  if (!k) return '';
+  let html = '<h2>' + esc(k.title) + '</h2>';
+  const items = k.items || [];
+  if (items.length) {
+    html += '<div class="section-label">Items (' + items.length + ')</div><div class="kb-items">';
+    items.forEach(item => { html += '<span class="kb-item">' + esc(typeof item === 'string' ? item : item.title || item.id) + '</span>'; });
+    html += '</div>';
+  }
+  return html;
+}
+
+function renderPolicy() {
+  const id = selectedId.replace('policy-', '');
+  const p = DATA.policies.find(x => x.id === id);
+  if (!p) return '';
+  let html = '<h2>' + esc(p.title) + ' <span class="badge ' + p.scope + '">' + p.scope + '</span></h2>';
+  html += '<div class="subtitle">' + esc(p.subtitle||'') + '</div>';
+  if (p.description) html += '<div class="description">' + esc(p.description) + '</div>';
+  if (p.source) html += '<div class="section-label">Source</div><div class="description"><a href="' + esc(p.source) + '" target="_blank" rel="noopener">' + esc(p.source) + '</a></div>';
+  const caps = p.relatedCapabilities || [];
+  if (caps.length) {
+    html += '<div class="section-label">Related Capabilities (' + caps.length + ')</div><div class="dep-list">';
+    caps.forEach(cId => {
+      const c = DATA.capabilities.find(x => x.id === cId);
+      html += '<span class="dep-chip playbook" data-nav="' + cId + '">' + (c ? esc(c.title) : cId) + '</span>';
+    });
+    html += '</div>';
+  }
+  const skills = p.relatedSkills || [];
+  if (skills.length) {
+    html += '<div class="section-label">Enforced By Skills (' + skills.length + ')</div><div class="dep-list">';
+    skills.forEach(sId => {
+      const sk = DATA.skills.find(x => x.id === sId);
+      html += '<span class="dep-chip tool" data-nav="skill-' + sId + '">' + (sk ? esc(sk.title) : sId) + '</span>';
+    });
+    html += '</div>';
+  }
+  const guards = p.relatedGuardrails || [];
+  if (guards.length) {
+    html += '<div class="section-label">Related Guardrails (' + guards.length + ')</div><div class="dep-list">';
+    guards.forEach(gId => {
+      const gr = DATA.guardrails.find(x => x.id === gId);
+      html += '<span class="dep-chip knowledge" data-nav="guardrail-' + gId + '">' + (gr ? esc(gr.title) : gId) + '</span>';
+    });
+    html += '</div>';
+  }
+  return html;
+}
+
+function renderGuardrail() {
+  const id = selectedId.replace('guardrail-', '');
+  const g = DATA.guardrails.find(x => x.id === id);
+  if (!g) return '';
+  let html = '<h2>' + esc(g.title) + ' <span class="badge ' + g.scope + '">' + g.scope + '</span></h2>';
+  html += '<div class="subtitle">' + esc(g.subtitle||'') + '</div>';
+  if (g.description) html += '<div class="description">' + esc(g.description) + '</div>';
+  if (g.source) html += '<div class="section-label">Source</div><div class="description"><a href="' + esc(g.source) + '" target="_blank" rel="noopener">' + esc(g.source) + '</a></div>';
+  const caps = g.relatedCapabilities || [];
+  if (caps.length) {
+    html += '<div class="section-label">Related Capabilities (' + caps.length + ')</div><div class="dep-list">';
+    caps.forEach(cId => {
+      const c = DATA.capabilities.find(x => x.id === cId);
+      html += '<span class="dep-chip playbook" data-nav="' + cId + '">' + (c ? esc(c.title) : cId) + '</span>';
+    });
+    html += '</div>';
+  }
+  const skills = g.relatedSkills || [];
+  if (skills.length) {
+    html += '<div class="section-label">Enforced By Skills (' + skills.length + ')</div><div class="dep-list">';
+    skills.forEach(sId => {
+      const sk = DATA.skills.find(x => x.id === sId);
+      html += '<span class="dep-chip tool" data-nav="skill-' + sId + '">' + (sk ? esc(sk.title) : sId) + '</span>';
+    });
+    html += '</div>';
+  }
+  const pols = g.relatedPolicies || [];
+  if (pols.length) {
+    html += '<div class="section-label">Related Policies (' + pols.length + ')</div><div class="dep-list">';
+    pols.forEach(pId => {
+      const po = DATA.policies.find(x => x.id === pId);
+      html += '<span class="dep-chip shared" data-nav="policy-' + pId + '">' + (po ? esc(po.title) : pId) + '</span>';
+    });
+    html += '</div>';
+  }
+  return html;
+}
+
+function renderRealTool() {
+  const id = selectedId.replace('realtool-', '');
+  const t = DATA.realtools.find(x => x.id === id);
+  if (!t) return '';
+  let html = '<h2>' + esc(t.title) + '</h2>';
+  html += '<div class="subtitle">' + esc(t.subtitle||'') + '</div>';
+  if (t.description) html += '<div class="description">' + esc(t.description) + '</div>';
+  const caps = t.relatedCapabilities || [];
+  if (caps.length) {
+    html += '<div class="section-label">Related Capabilities (' + caps.length + ')</div><div class="dep-list">';
+    caps.forEach(cId => {
+      const c = DATA.capabilities.find(x => x.id === cId);
+      html += '<span class="dep-chip playbook" data-nav="' + cId + '">' + (c ? esc(c.title) : cId) + '</span>';
+    });
+    html += '</div>';
+  }
+  const skills = t.relatedSkills || [];
+  if (skills.length) {
+    html += '<div class="section-label">Used By Skills (' + skills.length + ')</div><div class="dep-list">';
+    skills.forEach(sId => {
+      const sk = DATA.skills.find(x => x.id === sId);
+      html += '<span class="dep-chip tool" data-nav="skill-' + sId + '">' + (sk ? esc(sk.title) : sId) + '</span>';
+    });
+    html += '</div>';
+  }
+  const agents = t.relatedAgents || [];
+  if (agents.length) {
+    html += '<div class="section-label">Used By Agents (' + agents.length + ')</div><div class="dep-list">';
+    agents.forEach(aId => {
+      const a = DATA.aiAgents.find(x => x.id === aId);
+      html += '<span class="dep-chip specialist" data-nav="agent-' + aId + '">' + (a ? esc(a.title) : aId) + '</span>';
+    });
+    html += '</div>';
+  }
+  return html;
+}
+
+function renderInfrastructure() {
+  const id = selectedId.replace('infra-', '');
+  const i = DATA.infrastructure.find(x => x.id === id);
+  if (!i) return '';
+  let html = '<h2>' + esc(i.title) + '</h2>';
+  html += '<div class="subtitle">' + esc(i.subtitle||'') + '</div>';
+  if (i.concept) {
+    html += '<div class="section-label">Concept</div>';
+    html += '<div class="description">' + esc(i.concept) + '</div>';
+  }
+  if (i.technicalContext) {
+    html += '<div class="section-label">Technical Context</div>';
+    html += '<div class="description">' + esc(i.technicalContext) + '</div>';
+  }
+  if (i.description && !i.concept) html += '<div class="description">' + esc(i.description) + '</div>';
+  return html;
+}
+
+function renderPlaybook() {
+  const id = selectedId.replace('pb-', '');
+  const p = DATA.playbooks.find(x => x.id === id);
+  if (!p) return '';
+  let html = '<h2>' + esc(p.title) + '</h2>';
+  if (p.description) html += '<div class="description">' + esc(p.description) + '</div>';
+
+  const agentIds = p.aiAgents || [];
+  if (agentIds.length) {
+    html += '<div class="section-label">AI Agents (' + agentIds.length + ')</div><div class="dep-list">';
+    agentIds.forEach(aid => {
+      const a = DATA.aiAgents.find(x => x.id === aid);
+      html += '<span class="dep-chip specialist" data-nav="agent-' + aid + '">' + (a ? esc(a.title) : aid) + '</span>';
+    });
+    html += '</div>';
+  }
+
+  const phases = p.phases || [];
+  if (phases.length) {
+    html += '<div class="section-label">Phases</div><div class="description">' + esc(phases.join(' → ')) + '</div>';
+  }
+  return html;
+}
+
+function renderReverseDeps() {
+  const inbound = DATA.edges.filter(e => e.to === selectedId);
+
+  let html = '';
+  const usedBy = {};
+  inbound.forEach(e => {
+    const cat = e.from.split('-')[0];
+    if (!usedBy[cat]) usedBy[cat] = [];
+    usedBy[cat].push(e.from);
+  });
+
+  if (Object.keys(usedBy).length) {
+    html += '<div class="deps-from"><div class="section-label">Used By</div><div class="dep-list">';
+    Object.entries(usedBy).forEach(([cat, ids]) => {
+      ids.forEach(id => {
+        const item = findItem(id);
+        const chipClass = cat === 'agent' ? 'specialist' : cat === 'pb' ? 'playbook' : cat === 'skill' ? 'tool' : 'knowledge';
+        html += '<span class="dep-chip ' + chipClass + '" data-nav="' + id + '">' + (item ? esc(item.title) : id) + '</span>';
+      });
+    });
+    html += '</div></div>';
+  }
+
+  return html;
+}
+
+function findItem(id) {
+  const [prefix, ...rest] = id.split('-');
+  const rawId = rest.join('-');
+  if (prefix === 'cap') return DATA.capabilities.find(x => x.id === id);
+  if (prefix === 'ka') return DATA.knowledgeAssets.find(x => x.id === id);
+  if (prefix === 'agent') return DATA.aiAgents.find(x => x.id === rawId);
+  if (prefix === 'skill') return DATA.skills.find(x => x.id === rawId);
+  if (prefix === 'guideline') return DATA.guidelines.find(x => x.id === rawId);
+  if (prefix === 'pb') return DATA.playbooks.find(x => x.id === rawId);
+  if (prefix === 'policy') return DATA.policies.find(x => x.id === rawId);
+  if (prefix === 'guardrail') return DATA.guardrails.find(x => x.id === rawId);
+  if (prefix === 'realtool') return DATA.realtools.find(x => x.id === rawId);
+  if (prefix === 'infra') return DATA.infrastructure.find(x => x.id === rawId);
+  return null;
+}
+
+/* ── Architecture Map ── */
+const STAGE_COLORS = {discover:'#312e81',build:'#166534',run:'#0e7490',evolve:'#6b21a8',migrate:'#92400e',sunset:'#991b1b','cross-cutting':'#475569'};
+
+function buildFlowData(capId) {
+  const cap = DATA.capabilities.find(c => c.id === capId);
+  if (!cap) return null;
+
+  // Playbooks
+  const playbooks = (cap.playbooks||[]).map(id => DATA.playbooks.find(p => p.id === id)).filter(Boolean);
+
+  // Agents: union of playbook agents + cap.keyAgents, deduplicated
+  const agentIdSet = new Set(cap.keyAgents||[]);
+  playbooks.forEach(pb => (pb.aiAgents||[]).forEach(id => agentIdSet.add(id)));
+  const agents = [...agentIdSet].map(id => DATA.aiAgents.find(a => a.id === id)).filter(Boolean);
+
+  // Skills: union of agent skillChains + cap.keySkills, deduplicated
+  const skillIdSet = new Set(cap.keySkills||[]);
+  agents.forEach(a => (a.skillChain||[]).forEach(id => skillIdSet.add(id)));
+  const skills = [...skillIdSet].map(id => DATA.skills.find(s => s.id === id)).filter(Boolean);
+
+  // Tools: realtools where relatedSkills or relatedAgents overlap
+  const tools = DATA.realtools.filter(t => {
+    const tSkills = t.relatedSkills||[];
+    const tAgents = t.relatedAgents||[];
+    return tSkills.some(s => skillIdSet.has(s)) || tAgents.some(a => agentIdSet.has(a));
+  });
+
+  // Guidelines: union of all skill knowledgeDeps, deduplicated
+  const guidelineIdSet = new Set();
+  skills.forEach(sk => (sk.knowledgeDeps||[]).forEach(id => guidelineIdSet.add(id)));
+  const guidelines = [...guidelineIdSet].map(id => DATA.guidelines.find(g => g.id === id)).filter(Boolean);
+
+  // Rules: policies + guardrails where relatedCapabilities includes cap, OR relatedSkills overlap
+  const governance = [];
+  DATA.policies.forEach(p => {
+    if ((p.relatedCapabilities||[]).includes(capId) || (p.relatedSkills||[]).some(s => skillIdSet.has(s))) {
+      governance.push({type:'policy', item:p});
+    }
+  });
+  DATA.guardrails.forEach(g => {
+    if ((g.relatedCapabilities||[]).includes(capId) || (g.relatedSkills||[]).some(s => skillIdSet.has(s))) {
+      governance.push({type:'guardrail', item:g});
+    }
+  });
+
+  return {capability:cap, playbooks, agents, skills, tools, guidelines, governance};
+}
+
+function renderFlowConnector(text) {
+  return '<div class="map-flow-connector">'
+    + '<div class="connector-line"></div>'
+    + '<div class="connector-text">' + esc(text) + '</div>'
+    + '<div class="connector-line"></div>'
+    + '</div>';
+}
+
+function renderFlowBand(label, cards, bgColor) {
+  let html = '<div class="map-flow-band">';
+  html += '<div class="map-flow-band-label">' + esc(label) + '</div>';
+  html += '<div class="map-flow-cards" style="background:' + bgColor + '">';
+  html += cards;
+  html += '</div></div>';
+  return html;
+}
+
+function renderFlowCard(navId, title, subtitle) {
+  const expanded = mapExpandedCard === navId;
+  let html = '<div class="map-flow-card' + (expanded ? ' fc-expanded' : '') + '" data-flow-expand="' + navId + '">';
+  html += '<div class="fc-title">' + esc(title) + '</div>';
+  if (subtitle && !expanded) html += '<div class="fc-sub">' + esc(subtitle) + '</div>';
+  if (expanded) {
+    html += '<div class="fc-detail">' + renderCardDetail(navId) + '</div>';
+  }
+  html += '</div>';
+  return html;
+}
+
+function renderCardDetail(id) {
+  const prefix = id.split('-')[0];
+  const rawId = id.replace(/^[a-z]+-/, '');
+  let html = '';
+  if (prefix === 'pb') {
+    const pb = DATA.playbooks.find(x => x.id === rawId);
+    if (pb) {
+      if (pb.description) html += '<p>' + esc(pb.description) + '</p>';
+      if (pb.phases && pb.phases.length) html += '<p style="margin-top:4px;color:#94a3b8;font-size:11px">' + esc(pb.phases.join(' \u2192 ')) + '</p>';
+      if (pb.aiAgents && pb.aiAgents.length) {
+        html += '<div class="fc-detail-chips">';
+        pb.aiAgents.forEach(aId => { const a = DATA.aiAgents.find(x=>x.id===aId); html += '<span class="fc-detail-chip">' + (a?esc(a.title):aId) + '</span>'; });
+        html += '</div>';
+      }
+    }
+  } else if (prefix === 'agent') {
+    const a = DATA.aiAgents.find(x => x.id === rawId);
+    if (a) {
+      if (a.subtitle) html += '<p>' + esc(a.subtitle) + '</p>';
+      if (a.definitionOfDone) html += '<p style="margin-top:4px;font-style:italic;color:#94a3b8">' + esc(a.definitionOfDone) + '</p>';
+      if (a.skillChain && a.skillChain.length) {
+        html += '<div class="fc-detail-chips">';
+        a.skillChain.slice(0,6).forEach(sId => { const sk = DATA.skills.find(x=>x.id===sId); html += '<span class="fc-detail-chip">' + (sk?esc(sk.title):sId) + '</span>'; });
+        if (a.skillChain.length > 6) html += '<span class="fc-detail-chip">+' + (a.skillChain.length-6) + ' more</span>';
+        html += '</div>';
+      }
+    }
+  } else if (prefix === 'skill') {
+    const sk = DATA.skills.find(x => x.id === rawId);
+    if (sk) {
+      if (sk.description) html += '<p>' + esc(sk.description) + '</p>';
+      const mat = sk.maturity || 'production';
+      html += '<p style="margin-top:4px"><span class="maturity-badge ' + mat + '">' + mat.replace('-',' ') + '</span></p>';
+      const kDeps = sk.knowledgeDeps||[];
+      if (kDeps.length) {
+        html += '<p style="margin-top:4px;font-size:11px;color:#94a3b8">Guidelines: ' + kDeps.map(kid => { const g = DATA.guidelines.find(x=>x.id===kid); return g ? esc(g.title) : kid; }).join(', ') + '</p>';
+      }
+    }
+  } else if (prefix === 'realtool') {
+    const t = DATA.realtools.find(x => x.id === rawId);
+    if (t) {
+      if (t.description) html += '<p>' + esc(t.description) + '</p>';
+      const chips = [];
+      (t.relatedSkills||[]).forEach(sId => { const sk = DATA.skills.find(x=>x.id===sId); if (sk) chips.push(esc(sk.title)); });
+      (t.relatedAgents||[]).forEach(aId => { const a = DATA.aiAgents.find(x=>x.id===aId); if (a) chips.push(esc(a.title)); });
+      if (chips.length) {
+        html += '<div class="fc-detail-chips">';
+        chips.forEach(c => { html += '<span class="fc-detail-chip">' + c + '</span>'; });
+        html += '</div>';
+      }
+    }
+  } else if (prefix === 'policy') {
+    const p = DATA.policies.find(x => x.id === rawId);
+    if (p) {
+      html += '<p style="margin-bottom:4px"><span class="badge ' + (p.scope||'internal') + '">' + (p.scope||'internal') + '</span></p>';
+      if (p.description) html += '<p>' + esc(p.description) + '</p>';
+      const caps = (p.relatedCapabilities||[]).map(cId => { const c = DATA.capabilities.find(x=>x.id===cId); return c ? esc(c.title) : null; }).filter(Boolean);
+      const sks = (p.relatedSkills||[]).map(sId => { const sk = DATA.skills.find(x=>x.id===sId); return sk ? esc(sk.title) : null; }).filter(Boolean);
+      if (caps.length || sks.length) {
+        html += '<div class="fc-detail-chips">';
+        caps.forEach(c => { html += '<span class="fc-detail-chip">' + c + '</span>'; });
+        sks.forEach(s => { html += '<span class="fc-detail-chip">' + s + '</span>'; });
+        html += '</div>';
+      }
+    }
+  } else if (prefix === 'guardrail') {
+    const g = DATA.guardrails.find(x => x.id === rawId);
+    if (g) {
+      html += '<p style="margin-bottom:4px"><span class="badge ' + (g.scope||'internal') + '">' + (g.scope||'internal') + '</span></p>';
+      if (g.description) html += '<p>' + esc(g.description) + '</p>';
+      const caps = (g.relatedCapabilities||[]).map(cId => { const c = DATA.capabilities.find(x=>x.id===cId); return c ? esc(c.title) : null; }).filter(Boolean);
+      const sks = (g.relatedSkills||[]).map(sId => { const sk = DATA.skills.find(x=>x.id===sId); return sk ? esc(sk.title) : null; }).filter(Boolean);
+      if (caps.length || sks.length) {
+        html += '<div class="fc-detail-chips">';
+        caps.forEach(c => { html += '<span class="fc-detail-chip">' + c + '</span>'; });
+        sks.forEach(s => { html += '<span class="fc-detail-chip">' + s + '</span>'; });
+        html += '</div>';
+      }
+    }
+  } else if (prefix === 'guideline') {
+    const g = DATA.guidelines.find(x => x.id === rawId);
+    if (g) {
+      const items = g.items||[];
+      if (items.length) {
+        html += '<div class="fc-detail-chips">';
+        items.forEach(item => { html += '<span class="fc-detail-chip">' + esc(typeof item === 'string' ? item : item.title||item.id) + '</span>'; });
+        html += '</div>';
+      }
+      // Show which skills depend on this guideline
+      const depSkills = DATA.skills.filter(sk => (sk.knowledgeDeps||[]).includes(rawId));
+      if (depSkills.length) {
+        html += '<p style="margin-top:6px;font-size:11px;color:#94a3b8">Used by: ' + depSkills.map(sk => esc(sk.title)).join(', ') + '</p>';
+      }
+    }
+  }
+  return html;
+}
+
+function renderMapView() {
+  let html = '<div class="map-outer">';
+  if (mapSelectedCap) {
+    html += renderMapFlow();
+  } else {
+    html += renderMapPicker();
+  }
+  html += '</div>';
+  return html;
+}
+
+function renderMapPicker() {
+  let html = '<div class="map-picker">';
+  html += '<div class="map-picker-title">The Full System</div>';
+  html += '<div class="map-picker-subtitle">Click a capability to see its activation flow</div>';
+
+  // --- Capabilities by stage (including cross-cutting as a column) ---
+  const stageOrder = ['discover','build','run','evolve','migrate','sunset','cross-cutting'];
+  const stageCols = stageOrder.map(sId => {
+    const stage = DATA.lifecycleStages.find(ls => ls.id === sId);
+    const label = stage ? stage.title : 'Cross-cutting';
+    const caps = DATA.capabilities.filter(c => c.stage === sId);
+    const color = STAGE_COLORS[sId] || '#475569';
+    return {label, caps, color};
+  }).filter(x => x.caps.length > 0);
+  const totalCaps = DATA.capabilities.length;
+
+  html += '<div class="map-flow-band" style="margin-bottom:0">';
+  html += '<div class="map-flow-band-label">Capabilities (' + totalCaps + ')</div>';
+  html += '<div class="map-picker-stages">';
+  stageCols.forEach(({label, caps, color}) => {
+    html += '<div class="map-picker-stage">';
+    html += '<div class="map-picker-header" style="background:' + color + '">' + esc(label) + ' (' + caps.length + ')</div>';
+    caps.forEach(cap => {
+      html += '<div class="map-picker-card" data-cap-pick="' + cap.id + '">';
+      html += '<div class="pc-accent" style="background:' + color + '"></div>';
+      html += '<div class="pc-title">' + esc(cap.title) + '</div>';
+      if (cap.description) html += '<div class="pc-domain">' + esc(cap.description.length > 80 ? cap.description.slice(0,80) + '…' : cap.description) + '</div>';
+      html += '</div>';
+    });
+    html += '</div>';
+  });
+  html += '</div></div>';
+
+  // --- Playbooks ---
+  html += renderFlowConnector('activate');
+  let pbCards = '';
+  DATA.playbooks.forEach(pb => { pbCards += renderFlowCard('pb-' + pb.id, (pb.icon||'') + ' ' + pb.title, pb.description ? (pb.description.length > 60 ? pb.description.slice(0,60) + '…' : pb.description) : null); });
+  html += renderFlowBand('Playbooks (' + DATA.playbooks.length + ')', pbCards, '#fff7ed');
+
+  // --- AI Agents ---
+  html += renderFlowConnector('mobilize');
+  let agentCards = '';
+  DATA.aiAgents.forEach(a => { agentCards += renderFlowCard('agent-' + a.id, (a.icon||'') + ' ' + a.title, a.subtitle||null); });
+  html += renderFlowBand('AI Agents (' + DATA.aiAgents.length + ')', agentCards, '#fef3c7');
+
+  // --- Skills ---
+  html += renderFlowConnector('execute');
+  let skillCards = '';
+  DATA.skills.forEach(sk => { skillCards += renderFlowCard('skill-' + sk.id, (sk.icon||'') + ' ' + sk.title, sk.subtitle||null); });
+  html += renderFlowBand('Skills (' + DATA.skills.length + ')', skillCards, '#e0f2fe');
+
+  // --- Tools ---
+  html += renderFlowConnector('use');
+  let toolCards = '';
+  DATA.realtools.forEach(t => { toolCards += renderFlowCard('realtool-' + t.id, t.title, t.subtitle||null); });
+  html += renderFlowBand('Tools (' + DATA.realtools.length + ')', toolCards, '#ecfeff');
+
+  // --- Guidelines ---
+  html += renderFlowConnector('follow');
+  let guidelineCards = '';
+  DATA.guidelines.forEach(g => { const items = g.items||[]; const preview = items.slice(0,3).map(i => typeof i === 'string' ? i : i.title||i.id).join(', ') + (items.length > 3 ? ' …' : ''); guidelineCards += renderFlowCard('guideline-' + g.id, (g.icon||'') + ' ' + g.title, preview || null); });
+  html += renderFlowBand('Guidelines (' + DATA.guidelines.length + ')', guidelineCards, '#f0fdf4');
+
+  // --- Rules ---
+  const govCount = DATA.policies.length + DATA.guardrails.length;
+  html += renderFlowConnector('adhere to');
+  let govCards = '';
+  DATA.policies.forEach(p => { govCards += renderFlowCard('policy-' + p.id, p.title, 'Policy · ' + (p.scope||'internal')); });
+  DATA.guardrails.forEach(g => { govCards += renderFlowCard('guardrail-' + g.id, g.title, 'Guardrail · ' + (g.scope||'internal')); });
+  html += renderFlowBand('Rules (' + govCount + ')', govCards, '#faf5ff');
+
+  html += '</div>';
+  return html;
+}
+
+function renderMapFlow() {
+  const flow = buildFlowData(mapSelectedCap);
+  if (!flow) return '<div class="map-flow"><p>Capability not found.</p></div>';
+  const cap = flow.capability;
+  const stage = DATA.lifecycleStages.find(s => s.id === cap.stage);
+  const stageColor = STAGE_COLORS[cap.stage] || '#475569';
+
+  let html = '<div class="map-flow">';
+  html += '<button class="map-back-btn" data-map-back>&larr; Back to full chart</button>';
+
+  // 1. Capability band (expanded)
+  html += '<div class="map-flow-band">';
+  html += '<div class="map-flow-band-label">Capability' + (stage ? ' &middot; ' + esc(stage.title) : '') + '</div>';
+  html += '<div class="map-flow-cards" style="background:' + stageColor + '18">';
+  html += '<div class="map-flow-card-expanded">';
+  html += '<div class="fce-title">' + esc(cap.title) + '</div>';
+  html += '<div class="fce-desc">' + esc(cap.description) + '</div>';
+  if (cap.domain) html += '<div class="fce-domain">' + esc(cap.domain) + '</div>';
+  html += '</div></div></div>';
+
+  // 2. Playbooks
+  if (flow.playbooks.length) {
+    html += renderFlowConnector('activate');
+    let cards = '';
+    flow.playbooks.forEach(pb => {
+      cards += renderFlowCard('pb-' + pb.id, (pb.icon||'') + ' ' + pb.title, pb.description ? (pb.description.length > 60 ? pb.description.slice(0,60) + '…' : pb.description) : null);
+    });
+    html += renderFlowBand('Playbooks', cards, '#fff7ed');
+  }
+
+  // 3. Agents
+  if (flow.agents.length) {
+    html += renderFlowConnector('mobilize');
+    let cards = '';
+    flow.agents.forEach(a => {
+      cards += renderFlowCard('agent-' + a.id, (a.icon||'') + ' ' + a.title, a.subtitle||null);
+    });
+    html += renderFlowBand('AI Agents', cards, '#fef3c7');
+  }
+
+  // 4. Skills
+  if (flow.skills.length) {
+    html += renderFlowConnector('execute');
+    let cards = '';
+    flow.skills.forEach(sk => {
+      cards += renderFlowCard('skill-' + sk.id, (sk.icon||'') + ' ' + sk.title, sk.subtitle||null);
+    });
+    html += renderFlowBand('Skills', cards, '#e0f2fe');
+  }
+
+  // 5. Tools
+  if (flow.tools.length) {
+    html += renderFlowConnector('use');
+    let cards = '';
+    flow.tools.forEach(t => {
+      cards += renderFlowCard('realtool-' + t.id, t.title, t.subtitle||null);
+    });
+    html += renderFlowBand('Tools', cards, '#ecfeff');
+  }
+
+  // 6. Guidelines
+  if (flow.guidelines.length) {
+    html += renderFlowConnector('follow');
+    let cards = '';
+    flow.guidelines.forEach(g => {
+      const gitems = g.items||[];
+      const preview = gitems.slice(0,3).map(i => typeof i === 'string' ? i : i.title||i.id).join(', ') + (gitems.length > 3 ? ' …' : '');
+      cards += renderFlowCard('guideline-' + g.id, (g.icon||'') + ' ' + g.title, preview || null);
+    });
+    html += renderFlowBand('Guidelines', cards, '#f0fdf4');
+  }
+
+  // 7. Rules
+  if (flow.governance.length) {
+    html += renderFlowConnector('adhere to');
+    let cards = '';
+    flow.governance.forEach(({type, item}) => {
+      const prefix = type === 'policy' ? 'policy-' : 'guardrail-';
+      const typeLabel = type === 'policy' ? 'Policy' : 'Guardrail';
+      cards += renderFlowCard(prefix + item.id, item.title, typeLabel + ' · ' + (item.scope||'internal'));
+    });
+    html += renderFlowBand('Rules', cards, '#faf5ff');
+  }
+
+  html += '</div>';
+  return html;
+}
+
+function renderProcessView() {
+  const {rows, phases} = PROCESS_DATA;
+  let html = '<div class="process-outer"><table class="process-table"><thead><tr>';
+  html += '<th class="pt-corner"></th>';
+  phases.forEach(p => {
+    if (visiblePhases.has(p.id)) {
+      html += '<th class="pt-phase-header" style="background:' + p.headerColor + '" data-toggle-phase="' + p.id + '">'
+        + p.icon + ' ' + esc(p.title) + '</th>';
+    } else {
+      html += '<th class="pt-collapsed-header" style="background:' + p.headerColor + '" data-toggle-phase="' + p.id + '">'
+        + '<div class="pt-collapsed-label">' + p.icon + ' ' + esc(p.title) + '</div></th>';
+    }
+  });
+  html += '</tr></thead><tbody>';
+  rows.forEach(row => {
+    const isVisible = visibleRows.has(row.key);
+    if (!isVisible) {
+      html += '<tr>';
+      html += '<td class="pt-row-label collapsed" data-toggle-row="' + row.key + '">'
+        + '<div class="pt-row-label-content"><span>' + esc(row.label) + '</span><span class="chevron">▶</span></div></td>';
+      phases.forEach(p => {
+        if (!visiblePhases.has(p.id)) {
+          html += '<td class="pt-collapsed-cell"></td>';
+        } else {
+          html += '<td class="pt-row-collapsed-filler"></td>';
+        }
+      });
+      html += '</tr>';
+      return;
+    }
+    html += '<tr>';
+    html += '<td class="pt-row-label" data-toggle-row="' + row.key + '">'
+      + '<div class="pt-row-label-content"><span>' + esc(row.label) + '</span><span class="chevron">▼</span></div></td>';
+    phases.forEach(p => {
+      if (!visiblePhases.has(p.id)) {
+        html += '<td class="pt-collapsed-cell"></td>';
+        return;
+      }
+      const val = p[row.key];
+      html += '<td style="background:' + p.bgColor + '">';
+      if (row.key === 'objective' && p.focus) {
+        html += '<p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#64748b;margin-bottom:4px">' + esc(p.focus) + '</p>';
+      }
+      if (!val) {
+        html += '<span style="color:#cbd5e1">—</span>';
+      } else if (typeof val === 'string') {
+        html += '<p class="pt-cell-text">' + esc(val) + '</p>';
+      } else if (Array.isArray(val)) {
+        html += '<ul class="pt-cell-items">';
+        val.forEach(item => { html += '<li>' + esc(item) + '</li>'; });
+        html += '</ul>';
+      } else if (typeof val === 'object') {
+        if (val.text) html += '<p class="pt-cell-text">' + esc(val.text) + '</p>';
+        if (val.items && val.items.length) {
+          html += '<ul class="pt-cell-items">';
+          val.items.forEach(item => { html += '<li>' + esc(item) + '</li>'; });
+          html += '</ul>';
+        }
+      }
+      html += '</td>';
+    });
+    html += '</tr>';
+  });
+  html += '</tbody></table></div>';
+  return html;
+}
+
+function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function bindEvents() {
+  document.querySelectorAll('[data-view]').forEach(el => {
+    el.addEventListener('click', (e) => { e.preventDefault(); viewMode = el.dataset.view; render(); });
+  });
+  document.querySelectorAll('.sidebar-item').forEach(el => {
+    el.addEventListener('click', () => { selectedId = el.dataset.id; render(); });
+  });
+  document.querySelectorAll('[data-nav]').forEach(el => {
+    el.addEventListener('click', (e) => {
+      e.stopPropagation();
+      selectedId = el.dataset.nav;
+      const prefix = selectedId.split('-')[0];
+      const catMap = {agent:'aiAgents',skill:'skills',guideline:'guidelines',pb:'playbooks',policy:'policies',guardrail:'guardrails',realtool:'realtools',infra:'orchestration',ka:'knowledgeAssets'};
+      if (catMap[prefix]) expandedCategories.add(catMap[prefix]);
+      if (prefix === 'cap') {
+        const cap = DATA.capabilities.find(c => c.id === selectedId);
+        if (cap) expandedCategories.add('cap-' + cap.stage);
+      }
+      render();
+      setTimeout(() => {
+        const item = document.querySelector('.sidebar-item.selected');
+        if (item) item.scrollIntoView({behavior:'smooth',block:'nearest'});
+      }, 50);
+    });
+  });
+  document.querySelectorAll('[data-toggle]').forEach(el => {
+    el.addEventListener('click', () => {
+      const key = el.dataset.toggle;
+      if (expandedCategories.has(key)) expandedCategories.delete(key);
+      else expandedCategories.add(key);
+      render();
+    });
+  });
+  document.querySelectorAll('[data-toggle-row]').forEach(el => {
+    el.addEventListener('click', () => {
+      const key = el.dataset.toggleRow;
+      if (visibleRows.has(key)) visibleRows.delete(key);
+      else visibleRows.add(key);
+      render();
+    });
+  });
+  document.querySelectorAll('[data-toggle-phase]').forEach(el => {
+    el.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const key = el.dataset.togglePhase;
+      if (visiblePhases.has(key)) visiblePhases.delete(key);
+      else visiblePhases.add(key);
+      render();
+    });
+  });
+  // Map: capability picker clicks
+  document.querySelectorAll('[data-cap-pick]').forEach(el => {
+    el.addEventListener('click', () => {
+      mapSelectedCap = el.dataset.capPick;
+      mapExpandedCard = null;
+      render();
+      // Scroll to top of map
+      const outer = document.querySelector('.map-outer');
+      if (outer) outer.scrollTop = 0;
+    });
+  });
+  // Map: back button
+  document.querySelectorAll('[data-map-back]').forEach(el => {
+    el.addEventListener('click', () => {
+      mapSelectedCap = null;
+      mapExpandedCard = null;
+      render();
+    });
+  });
+  // Search
+  function selectSearchResult(navId) {
+    selectedId = navId;
+    const prefix = navId.split('-')[0];
+    const catMap = {agent:'aiAgents',skill:'skills',guideline:'guidelines',pb:'playbooks',policy:'policies',guardrail:'guardrails',realtool:'realtools',infra:'orchestration',ka:'knowledgeAssets'};
+    if (catMap[prefix]) expandedCategories.add(catMap[prefix]);
+    if (prefix === 'cap') {
+      const cap = DATA.capabilities.find(c => c.id === navId);
+      if (cap) expandedCategories.add('cap-' + cap.stage);
+    }
+    searchQuery = ''; searchResults = []; searchActiveIdx = -1;
+    render();
+    // Scroll sidebar to show the selected item
+    setTimeout(() => {
+      const el = document.querySelector('.sidebar-item.selected');
+      if (el) el.scrollIntoView({behavior:'smooth',block:'nearest'});
+    }, 50);
+  }
+  const searchInput = document.getElementById('fi-search');
+  const searchClear = document.getElementById('fi-search-clear');
+  if (searchInput) {
+    if (searchQuery) {
+      searchInput.focus();
+      searchInput.setSelectionRange(searchQuery.length, searchQuery.length);
+    }
+    let debounceTimer = null;
+    searchInput.addEventListener('input', () => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        searchQuery = searchInput.value;
+        searchResults = searchEntities(searchQuery);
+        searchActiveIdx = -1;
+        render();
+      }, 150);
+    });
+    searchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        if (searchResults.length) { searchActiveIdx = Math.min(searchActiveIdx + 1, searchResults.length - 1); render(); }
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        if (searchResults.length) { searchActiveIdx = Math.max(searchActiveIdx - 1, -1); render(); }
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        if (searchActiveIdx >= 0 && searchResults[searchActiveIdx]) {
+          selectSearchResult(searchResults[searchActiveIdx].navId);
+        }
+      } else if (e.key === 'Escape') {
+        searchQuery = ''; searchResults = []; searchActiveIdx = -1;
+        render();
+      }
+    });
+  }
+  if (searchClear) {
+    searchClear.addEventListener('click', () => {
+      searchQuery = ''; searchResults = []; searchActiveIdx = -1; render();
+    });
+  }
+  document.querySelectorAll('[data-search-nav]').forEach(el => {
+    el.addEventListener('click', () => { selectSearchResult(el.dataset.searchNav); });
+  });
+  // Close search dropdown when clicking outside
+  document.addEventListener('click', (e) => {
+    if (searchQuery && !e.target.closest('.search-bar')) {
+      searchQuery = ''; searchResults = []; searchActiveIdx = -1; render();
+    }
+  }, {once: true});
+  // Map: flow card inline expand toggle
+  document.querySelectorAll('[data-flow-expand]').forEach(el => {
+    el.addEventListener('click', () => {
+      const id = el.dataset.flowExpand;
+      mapExpandedCard = (mapExpandedCard === id) ? null : id;
+      render();
+      // Scroll expanded card into view
+      if (mapExpandedCard) {
+        setTimeout(() => {
+          const card = document.querySelector('[data-flow-expand="' + mapExpandedCard + '"]');
+          if (card) card.scrollIntoView({behavior:'smooth',block:'nearest'});
+        }, 50);
+      }
+    });
+  });
+}
+
+render();
+</script>
+</body>
+</html>

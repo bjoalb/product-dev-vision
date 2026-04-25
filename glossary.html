@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Glossary — Systemised Operations for Digital Product Development</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f8fafc;color:#000}
+.header{background:#000;color:#fff;padding:16px 32px;display:flex;align-items:center;gap:24px;height:60px}
+.header-tabs{display:flex;gap:4px;background:rgba(255,255,255,.06);padding:4px;border-radius:8px}
+.tab-btn{padding:7px 16px;border-radius:6px;border:none;background:transparent;color:rgba(255,255,255,.5);font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;text-decoration:none;display:inline-flex;align-items:center}
+.tab-btn:hover{background:rgba(255,255,255,.1);color:rgba(255,255,255,.85)}
+.tab-btn.active{background:rgba(255,255,255,.15);color:#fff}
+.header-logo{margin-left:auto;display:flex;align-items:center}
+.header-logo svg{height:20px;width:auto}
+.page-footer .sep{width:1px;height:12px;background:#e2e8f0}
+.main{display:flex;height:calc(100vh - 95px);overflow:hidden}
+.sidebar{width:300px;border-right:1px solid #e2e8f0;overflow-y:auto;background:#fff;flex-shrink:0}
+.sidebar h3{padding:8px 16px;font-size:13px;color:#000;letter-spacing:0;border-bottom:1px solid #f1f5f9;cursor:pointer;display:flex;align-items:center;justify-content:space-between;user-select:none;font-weight:700}
+.sidebar h3:hover{background:#f8fafc}
+.sidebar h3 .chevron{font-size:10px;transition:transform .15s;color:#94a3b8}
+.sidebar-item{padding:8px 16px 8px 24px;cursor:pointer;display:flex;align-items:center;gap:8px;font-size:13px;border-bottom:1px solid #f8fafc;transition:background .1s;color:#000}
+.sidebar-item:hover{background:#f1f5f9}
+.sidebar-item.selected{background:#eef2ff;border-left:3px solid #1e2761;padding-left:21px}
+.canvas{flex:1;overflow:auto;padding:32px}
+.detail-panel{background:#fff;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,.1);padding:32px;max-width:820px;margin:0 auto}
+.layer-meta{font-size:11px;font-weight:700;color:#000;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px}
+.layer-focus{font-size:13px;color:#000;padding-bottom:12px;border-bottom:2px solid #1e2761;margin-bottom:20px}
+.term-name{font-size:24px;font-weight:700;color:#000;margin-bottom:20px}
+.def-block{margin-bottom:16px}
+.def-label{font-size:12px;font-weight:700;color:#000;margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em}
+.def-text{font-size:14px;line-height:1.65;color:#000}
+.def-text.technical{color:#000;background:#f8fafc;padding:10px 12px 10px 0;border-radius:6px;font-size:13px;text-align:left}
+.intro{background:#fff;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,.1);padding:32px;max-width:820px;margin:0 auto}
+.intro h2{font-size:20px;font-weight:700;color:#000;margin-bottom:12px}
+.intro p{font-size:14px;line-height:1.65;color:#000}
+.page-footer{padding:12px 32px;background:#f8fafc;border-top:1px solid #e2e8f0;display:flex;gap:16px;align-items:center;font-size:11px;color:#000}
+.page-footer a{color:#000;text-decoration:none;transition:color .15s}
+.page-footer a:hover{color:#1e2761;text-decoration:underline}
+@media(max-width:768px){.main{flex-direction:column;height:auto}.sidebar{width:100%;max-height:40vh;border-right:none;border-bottom:1px solid #e2e8f0}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-tabs">
+    <a class="tab-btn" href="product-dev-ai-studio-map.html">Work Chart</a>
+    <a class="tab-btn" href="product-dev-ai-studio-map.html#process">Process View</a>
+  </div>
+  <div class="header-logo"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 511.88 164.53"><path fill="#fff" d="M0,3.39h97.41v30.74h-63.51v32.77h55.6v28.02h-55.6v35.93h63.51v30.74H0V3.39Z"/><path fill="#fff" d="M109.16,18.76c0-10.17,8.14-18.76,18.53-18.76s18.98,8.59,18.98,18.76-8.59,18.76-18.98,18.76-18.53-8.36-18.53-18.76ZM111.64,49.49h32.54v112.09h-32.54V49.49Z"/><path fill="#fff" d="M155.26,105.54c0-34.13,24.86-58.99,54.92-58.99,15.14,0,28.25,6.1,36.16,17.63V3.39h32.54v158.2h-32.54v-14.69c-7.23,11.53-21.02,17.63-36.16,17.63-30.06,0-54.92-24.86-54.92-58.99ZM246.79,105.32c0-16.72-12.88-30.06-29.38-30.06s-29.15,13.33-29.15,30.28,12.88,30.28,29.15,30.28,29.38-13.56,29.38-30.51Z"/><path fill="#fff" d="M293.8,49.49h32.54v19.66c5.88-13.11,16.5-19.66,33-19.66h24.86v30.28h-27.35c-19.66,0-30.51,11.3-30.51,31.64v50.17h-32.54V49.49Z"/><path fill="#fff" d="M388.26,105.54c0-34.13,24.86-58.99,54.92-58.99,14.92,0,28.25,6.1,36.16,17.63v-14.69h32.54v112.09h-32.54v-14.69c-7.23,11.53-21.24,17.63-36.16,17.63-30.06,0-54.92-24.86-54.92-58.99ZM479.79,105.32c0-16.72-12.88-30.06-29.38-30.06s-29.15,13.33-29.15,30.28,12.88,30.28,29.15,30.28,29.38-13.56,29.38-30.51Z"/></svg></div>
+</div>
+
+<div id="app"></div>
+
+<div class="page-footer">
+  <a href="product-dev-ai-studio-map.html#studio">Functions Inventory</a>
+  <div class="sep"></div>
+  <a href="product-dev-ai-studio-map.html">Work Chart</a>
+</div>
+
+<script>
+const LAYERS = [
+  {
+    key: 'strategic',
+    num: '1',
+    label: 'Strategic & Functional',
+    focus: 'The "Outcome" — Business value, objectives, and operational master-plans.',
+    terms: [
+      {
+        id: 'playbook',
+        name: 'Playbook',
+        concept: 'The authoritative master plan that encodes the department\'s operational logic, procedures, and success criteria into a machine-readable format.',
+        technical: 'A version-controlled repository of "Golden Trajectories" and orchestration logic (Infrastructure-as-Process) that ensures the autonomous operation aligns with validated interaction sequences.'
+      },
+      {
+        id: 'capability',
+        name: 'Capability',
+        concept: 'A high-level, outcome-oriented business strength provided by the system (e.g., "Autonomous Underwriting" or "Global Logistics Optimization").',
+        technical: 'The functional service boundary that encapsulates specific agents and tools required to deliver a discrete business objective. This is the "Product" the system provides to the organization.'
+      },
+      {
+        id: 'lifecycle-stage',
+        name: 'Lifecycle Stage',
+        concept: 'The phase a capability operates within in the product development lifecycle: Discover, Build, Run, Evolve, Migrate, or Sunset. Cross-cutting capabilities span all stages.',
+        technical: 'A classification tag on each capability that determines its position in the Work Chart and influences which playbooks, agents, and skills are activated.'
+      },
+      {
+        id: 'knowledge-asset',
+        name: 'Knowledge Asset',
+        concept: 'A living document, framework, or structured repository that codifies organizational knowledge and feeds into capabilities and guidelines (e.g., Product Vision, Digital Experience Strategy).',
+        technical: 'A versioned reference artifact stored in the knowledge layer, linked to capabilities and guidelines, and retrievable via RAG for agent reasoning context.'
+      },
+      {
+        id: 'activation-flow',
+        name: 'Activation Flow',
+        concept: 'The complete chain of entities that activate when a capability is triggered — from playbooks through agents, skills, tools, guidelines, and rules.',
+        technical: 'A directed acyclic graph traversal from a capability node through its connected playbooks, agents (via skillChain), skills (via toolDeps/knowledgeDeps), and governance entities.'
+      }
+    ]
+  },
+  {
+    key: 'structural',
+    num: '2',
+    label: 'Structural & Architectural',
+    focus: 'The "Team" — How the digital workforce is organized and how entities collaborate.',
+    terms: [
+      {
+        id: 'mas',
+        name: 'Multi-agent System (MAS)',
+        concept: 'The collaborative organizational framework where multiple specialized AI entities interact and coordinate to solve problems that exceed the capacity of a single agent.',
+        technical: 'The architectural design (e.g., Supervisor, Peer-to-Peer, or Federated) that manages message passing, task decomposition, and consensus between distinct agent nodes to deliver a Capability.'
+      },
+      {
+        id: 'ai-agent',
+        name: 'AI Agent',
+        concept: 'An autonomous digital entity assigned a specific role or persona (e.g., "The Technical Auditor") that can reason and take actions to achieve a goal within its defined scope.',
+        technical: 'A stateful execution loop combining a Large Language Model (LLM) "brain" with planning modules, specialized memory, and an action space.'
+      },
+      {
+        id: 'sub-agent',
+        name: 'Sub-agent',
+        concept: 'A specialized, temporary worker spawned by a primary agent to handle a narrow, atomic task.',
+        technical: 'A task-scoped worker with restricted tool access and minimal context window requirements, used to isolate complexity and improve system reliability.'
+      }
+    ]
+  },
+  {
+    key: 'governance',
+    num: '3',
+    label: 'Rules & Logic',
+    focus: 'The "Constraints" — The rules of engagement, safety, and qualitative standards.',
+    terms: [
+      {
+        id: 'policy',
+        name: 'Policy',
+        concept: 'The business decision-making logic that dictates how the system chooses between valid paths (e.g., "Approve refund only if the account is older than 90 days").',
+        technical: 'Probabilistic or deterministic logic evaluated by the reasoning engine to select the optimal action path based on specific business requirements.'
+      },
+      {
+        id: 'guardrails',
+        name: 'Guardrails',
+        concept: 'Inviolable technical and safety boundaries that prevent the system from taking prohibited or harmful actions (e.g., "Never expose PII" or "Block database deletion commands").',
+        technical: 'Runtime interceptors and output validators that perform real-time sanitization and enforcement of safety/security constraints before an action is executed.'
+      },
+      {
+        id: 'guidelines',
+        name: 'Guidelines',
+        concept: 'Qualitative reference standards that ensure the system\'s output aligns with corporate identity and aesthetics (e.g., Brand Voice, Tone, or Design Systems).',
+        technical: 'Static reference data retrieved via RAG (Retrieval-Augmented Generation) to provide "few-shot" examples for the agent\'s reasoning process.'
+      }
+    ]
+  },
+  {
+    key: 'execution',
+    num: '4',
+    label: 'Execution & Action',
+    focus: 'The "Doing" — Atomic skills and real-world interactions.',
+    terms: [
+      {
+        id: 'skill',
+        name: 'Skill',
+        concept: 'A modular "how-to" package that grants an agent a specific repeatable ability or analytical method (e.g., "Calculate Tax Liability").',
+        technical: 'A standardized, portable directory containing an instruction manifest (e.g., SKILL.md) and executable scripts, loaded via progressive disclosure to save context and tokens.'
+      },
+      {
+        id: 'tool',
+        name: 'Tool',
+        concept: 'The specific software interfaces or external functions through which the agent interacts with the outside world.',
+        technical: 'Defined functions with strict input/output schemas (e.g., APIs, Database Connectors, or SDKs) that provide the agent with its "Action Space."'
+      }
+    ]
+  },
+  {
+    key: 'substrate',
+    num: '5',
+    label: 'Technical Substrate',
+    focus: 'The "Infrastructure" — The underlying engineering foundations required for the system to exist.',
+    terms: [
+      {
+        id: 'orchestration-engine',
+        name: 'Orchestration Engine',
+        concept: 'The "Conductor" of the system that manages the workflow state, tracks progress, and ensures handoffs follow the Playbook.',
+        technical: 'A graph-based control plane (e.g., LangGraph or Temporal) that handles durable execution, checkpointing, and recovery of long-running workflows.'
+      },
+      {
+        id: 'state-memory',
+        name: 'State & Memory Management',
+        concept: 'The system\'s ability to retain context, learn from previous steps, and maintain a consistent "thread" across long-running tasks and sessions.',
+        technical: 'A persistence layer using Vector Databases for semantic recall (Long-term) and Key-Value stores for active task state (Short-term).'
+      },
+      {
+        id: 'runtime',
+        name: 'Runtime Environment',
+        concept: 'The secure, isolated digital "Office" where agents execute their reasoning and code.',
+        technical: 'Containerized sandboxes (e.g., Kubernetes or Docker) providing isolated compute resources and preventing agent actions from impacting core system stability.'
+      }
+    ]
+  }
+];
+
+const app = document.getElementById('app');
+const expanded = new Set(LAYERS.map(l => l.key));
+let selectedId = null;
+
+function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function render() {
+  app.innerHTML = '<div class="main">' + renderSidebar() + renderCanvas() + '</div>';
+  bindEvents();
+}
+
+function renderSidebar() {
+  let html = '<div class="sidebar">';
+  LAYERS.forEach(layer => {
+    const open = expanded.has(layer.key);
+    const chevron = open ? '&#9660;' : '&#9654;';
+    html += '<h3 data-toggle="' + layer.key + '"><span>' + layer.num + '. ' + esc(layer.label) + '</span><span class="chevron">' + chevron + '</span></h3>';
+    if (open) {
+      layer.terms.forEach(t => {
+        const sel = selectedId === t.id ? ' selected' : '';
+        html += '<div class="sidebar-item' + sel + '" data-id="' + t.id + '"><span class="name">' + esc(t.name) + '</span></div>';
+      });
+    }
+  });
+  return html + '</div>';
+}
+
+function renderCanvas() {
+  if (!selectedId) {
+    return '<div class="canvas"><div class="intro">'
+      + '<h2>Glossary</h2>'
+      + '<p>This glossary provides a unified language for describing an AI-driven system designed to replace a functional business department. It is organized from the highest level of human-strategic interaction down to the technical execution layers. Select a term from the sidebar to view its definition.</p>'
+      + '</div></div>';
+  }
+  let layer, term;
+  for (const l of LAYERS) {
+    const t = l.terms.find(x => x.id === selectedId);
+    if (t) { layer = l; term = t; break; }
+  }
+  if (!term) return '<div class="canvas"></div>';
+
+  let html = '<div class="canvas"><div class="detail-panel">';
+  html += '<div class="layer-meta">Layer ' + layer.num + ' &middot; ' + esc(layer.label) + '</div>';
+  html += '<div class="layer-focus">' + esc(layer.focus) + '</div>';
+  html += '<div class="term-name">' + esc(term.name) + '</div>';
+  html += '<div class="def-block"><div class="def-label">Concept</div><div class="def-text">' + esc(term.concept) + '</div></div>';
+  html += '<div class="def-block"><div class="def-label">Technical Context</div><div class="def-text technical">' + esc(term.technical) + '</div></div>';
+  html += '</div></div>';
+  return html;
+}
+
+function bindEvents() {
+  document.querySelectorAll('[data-toggle]').forEach(el => {
+    el.addEventListener('click', () => {
+      const k = el.dataset.toggle;
+      if (expanded.has(k)) expanded.delete(k); else expanded.add(k);
+      render();
+    });
+  });
+  document.querySelectorAll('.sidebar-item').forEach(el => {
+    el.addEventListener('click', () => { selectedId = el.dataset.id; render(); });
+  });
+}
+
+render();
+</script>
+
+</body>
+</html>
