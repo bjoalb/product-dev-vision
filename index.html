@@ -1091,39 +1091,46 @@ function renderMapPicker() {
   // --- Playbooks ---
   html += renderFlowConnector('activate');
   let pbCards = '';
-  DATA.playbooks.forEach(pb => { pbCards += renderFlowCard('pb-' + pb.id, (pb.icon||'') + ' ' + pb.title, pb.description ? (pb.description.length > 60 ? pb.description.slice(0,60) + '…' : pb.description) : null); });
+  DATA.playbooks.slice().sort((a,b) => a.title.localeCompare(b.title)).forEach(pb => { pbCards += renderFlowCard('pb-' + pb.id, (pb.icon||'') + ' ' + pb.title, pb.description ? (pb.description.length > 60 ? pb.description.slice(0,60) + '…' : pb.description) : null); });
   html += renderFlowBand('Playbooks (' + DATA.playbooks.length + ')', pbCards, '#fff7ed');
 
   // --- AI Agents ---
   html += renderFlowConnector('mobilize');
   let agentCards = '';
-  DATA.aiAgents.forEach(a => { agentCards += renderFlowCard('agent-' + a.id, (a.icon||'') + ' ' + a.title, a.subtitle||null); });
+  DATA.aiAgents.slice().sort((a,b) => a.title.localeCompare(b.title)).forEach(a => { agentCards += renderFlowCard('agent-' + a.id, (a.icon||'') + ' ' + a.title, a.subtitle||null); });
   html += renderFlowBand('AI Agents (' + DATA.aiAgents.length + ')', agentCards, '#fef3c7');
 
   // --- Skills ---
   html += renderFlowConnector('execute');
   let skillCards = '';
-  DATA.skills.forEach(sk => { skillCards += renderFlowCard('skill-' + sk.id, (sk.icon||'') + ' ' + sk.title, sk.subtitle||null); });
+  DATA.skills.slice().sort((a,b) => a.title.localeCompare(b.title)).forEach(sk => { skillCards += renderFlowCard('skill-' + sk.id, (sk.icon||'') + ' ' + sk.title, sk.subtitle||null); });
   html += renderFlowBand('Skills (' + DATA.skills.length + ')', skillCards, '#e0f2fe');
 
   // --- Tools ---
   html += renderFlowConnector('use');
   let toolCards = '';
-  DATA.realtools.forEach(t => { toolCards += renderFlowCard('realtool-' + t.id, t.title, t.subtitle||null); });
+  DATA.realtools.slice().sort((a,b) => a.title.localeCompare(b.title)).forEach(t => { toolCards += renderFlowCard('realtool-' + t.id, t.title, t.subtitle||null); });
   html += renderFlowBand('Tools (' + DATA.realtools.length + ')', toolCards, '#ecfeff');
 
   // --- Guidelines ---
   html += renderFlowConnector('follow');
   let guidelineCards = '';
-  DATA.guidelines.forEach(g => { const items = g.items||[]; const preview = items.slice(0,3).map(i => typeof i === 'string' ? i : i.title||i.id).join(', ') + (items.length > 3 ? ' …' : ''); guidelineCards += renderFlowCard('guideline-' + g.id, (g.icon||'') + ' ' + g.title, preview || null); });
+  DATA.guidelines.slice().sort((a,b) => a.title.localeCompare(b.title)).forEach(g => { const items = g.items||[]; const preview = items.slice(0,3).map(i => typeof i === 'string' ? i : i.title||i.id).join(', ') + (items.length > 3 ? ' …' : ''); guidelineCards += renderFlowCard('guideline-' + g.id, (g.icon||'') + ' ' + g.title, preview || null); });
   html += renderFlowBand('Guidelines (' + DATA.guidelines.length + ')', guidelineCards, '#f0fdf4');
 
   // --- Rules ---
   const govCount = DATA.policies.length + DATA.guardrails.length;
   html += renderFlowConnector('adhere to');
   let govCards = '';
-  DATA.policies.forEach(p => { govCards += renderFlowCard('policy-' + p.id, p.title, 'Policy · ' + (p.scope||'internal'), true); });
-  DATA.guardrails.forEach(g => { govCards += renderFlowCard('guardrail-' + g.id, g.title, 'Guardrail · ' + (g.scope||'internal'), true); });
+  const allRules = [
+    ...DATA.policies.map(p => ({type:'policy', item:p})),
+    ...DATA.guardrails.map(g => ({type:'guardrail', item:g}))
+  ].sort((a,b) => a.item.title.localeCompare(b.item.title));
+  allRules.forEach(({type, item}) => {
+    const prefix = type === 'policy' ? 'policy-' : 'guardrail-';
+    const typeLabel = type === 'policy' ? 'Policy' : 'Guardrail';
+    govCards += renderFlowCard(prefix + item.id, item.title, typeLabel + ' · ' + (item.scope||'internal'), true);
+  });
   html += renderFlowBand('Rules (' + govCount + ')', govCards, '#faf5ff');
 
   html += '</div>';
