@@ -1463,19 +1463,24 @@ function bindEvents() {
       searchQuery = ''; searchResults = []; searchActiveIdx = -1; render();
     }
   }, {once: true});
-  // Map: flow card inline expand toggle
+  // Map: flow card click navigates to Functions Inventory detail
   document.querySelectorAll('[data-flow-expand]').forEach(el => {
     el.addEventListener('click', () => {
       const id = el.dataset.flowExpand;
-      mapExpandedCard = (mapExpandedCard === id) ? null : id;
-      render();
-      // Scroll expanded card into view
-      if (mapExpandedCard) {
-        setTimeout(() => {
-          const card = document.querySelector('[data-flow-expand="' + mapExpandedCard + '"]');
-          if (card) card.scrollIntoView({behavior:'smooth',block:'nearest'});
-        }, 50);
+      selectedId = id;
+      viewMode = 'studio';
+      const prefix = id.split('-')[0];
+      const catMap = {agent:'aiAgents',skill:'skills',guideline:'guidelines',pb:'playbooks',policy:'policies',guardrail:'guardrails',realtool:'realtools',infra:'orchestration',ka:'knowledgeAssets'};
+      if (catMap[prefix]) expandedCategories.add(catMap[prefix]);
+      if (prefix === 'cap') {
+        const cap = DATA.capabilities.find(c => c.id === id);
+        if (cap) expandedCategories.add('cap-' + cap.stage);
       }
+      render();
+      setTimeout(() => {
+        const sel = document.querySelector('.sidebar-item.selected');
+        if (sel) sel.scrollIntoView({behavior:'smooth',block:'nearest'});
+      }, 50);
     });
   });
 }
