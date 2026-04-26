@@ -147,9 +147,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .map-flow-card:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,.08);border-color:#cbd5e1}
 .map-flow-card .fc-title{font-size:12px;font-weight:600;color:#1a1a1a;line-height:1.3}
 .map-flow-card .fc-sub{font-size:10px;color:#64748b;margin-top:3px;line-height:1.3;flex:1}
-.map-flow-card.fc-expanded{border-color:#000;box-shadow:0 4px 16px rgba(0,0,0,.1);grid-column:span 2}
-.map-flow-card .fc-detail{display:none;margin-top:8px;padding-top:8px;border-top:1px solid #e2e8f0;font-size:12px;color:#475569;line-height:1.5}
+.map-flow-card.fc-expanded{border-color:#000;box-shadow:0 4px 16px rgba(0,0,0,.1);grid-column:span 3}
+.map-flow-card .fc-detail{display:none;margin-top:8px;padding-top:8px;border-top:1px solid #e2e8f0;font-size:12px;color:#475569;line-height:1.5;overflow:hidden}
 .map-flow-card.fc-expanded .fc-detail{display:block}
+.map-flow-card .fc-detail .rating-bar{flex-wrap:wrap;gap:10px}
 .map-flow-card .fc-detail-chips{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
 .map-flow-card .fc-detail-chip{padding:2px 8px;border-radius:4px;font-size:10px;font-weight:500;background:#f1f5f9;color:#475569}
 .map-flow-card-expanded{padding:20px 24px;border-radius:14px;background:#fff;border:2px solid #1e2761;box-shadow:0 4px 20px rgba(30,39,97,.12);text-align:left}
@@ -976,19 +977,106 @@ function renderFlowCard(navId, title, subtitle, govSub) {
 }
 
 function renderCardDetail(id) {
-  const prev = selectedId;
-  selectedId = id;
   const prefix = id.split('-')[0];
+  const rawId = id.replace(/^[a-z]+-/, '');
   let html = '';
-  if (prefix === 'pb') html = renderPlaybook();
-  else if (prefix === 'agent') html = renderAIAgent();
-  else if (prefix === 'skill') html = renderSkill();
-  else if (prefix === 'realtool') html = renderRealTool();
-  else if (prefix === 'policy') html = renderPolicy();
-  else if (prefix === 'guardrail') html = renderGuardrail();
-  else if (prefix === 'guideline') html = renderGuideline();
-  else if (prefix === 'cap') html = renderCapability();
-  selectedId = prev;
+  if (prefix === 'pb') {
+    const pb = DATA.playbooks.find(x => x.id === rawId);
+    if (pb) {
+      html += renderRatingBar(pb);
+      if (pb.description) html += '<p>' + esc(pb.description) + '</p>';
+      if (pb.phases && pb.phases.length) html += '<p style="margin-top:4px;color:#94a3b8;font-size:11px">' + esc(pb.phases.join(' \u2192 ')) + '</p>';
+      if (pb.aiAgents && pb.aiAgents.length) {
+        html += '<div class="fc-detail-chips">';
+        pb.aiAgents.forEach(aId => { const a = DATA.aiAgents.find(x=>x.id===aId); html += '<span class="fc-detail-chip">' + (a?esc(a.title):aId) + '</span>'; });
+        html += '</div>';
+      }
+    }
+  } else if (prefix === 'agent') {
+    const a = DATA.aiAgents.find(x => x.id === rawId);
+    if (a) {
+      html += renderRatingBar(a);
+      if (a.subtitle) html += '<p>' + esc(a.subtitle) + '</p>';
+      if (a.definitionOfDone) html += '<p style="margin-top:4px;font-style:italic;color:#94a3b8">' + esc(a.definitionOfDone) + '</p>';
+      if (a.skillChain && a.skillChain.length) {
+        html += '<div class="fc-detail-chips">';
+        a.skillChain.slice(0,6).forEach(sId => { const sk = DATA.skills.find(x=>x.id===sId); html += '<span class="fc-detail-chip">' + (sk?esc(sk.title):sId) + '</span>'; });
+        if (a.skillChain.length > 6) html += '<span class="fc-detail-chip">+' + (a.skillChain.length-6) + ' more</span>';
+        html += '</div>';
+      }
+    }
+  } else if (prefix === 'skill') {
+    const sk = DATA.skills.find(x => x.id === rawId);
+    if (sk) {
+      html += renderRatingBar(sk);
+      if (sk.description) html += '<p>' + esc(sk.description) + '</p>';
+      const mat = sk.maturity || 'production';
+      html += '<p style="margin-top:4px"><span class="maturity-badge ' + mat + '">' + mat.replace('-',' ') + '</span></p>';
+      const kDeps = sk.knowledgeDeps||[];
+      if (kDeps.length) {
+        html += '<p style="margin-top:4px;font-size:11px;color:#94a3b8">Guidelines: ' + kDeps.map(kid => { const g = DATA.guidelines.find(x=>x.id===kid); return g ? esc(g.title) : kid; }).join(', ') + '</p>';
+      }
+    }
+  } else if (prefix === 'realtool') {
+    const t = DATA.realtools.find(x => x.id === rawId);
+    if (t) {
+      html += renderRatingBar(t);
+      if (t.description) html += '<p>' + esc(t.description) + '</p>';
+      const chips = [];
+      (t.relatedSkills||[]).forEach(sId => { const sk = DATA.skills.find(x=>x.id===sId); if (sk) chips.push(esc(sk.title)); });
+      (t.relatedAgents||[]).forEach(aId => { const a = DATA.aiAgents.find(x=>x.id===aId); if (a) chips.push(esc(a.title)); });
+      if (chips.length) {
+        html += '<div class="fc-detail-chips">';
+        chips.forEach(c => { html += '<span class="fc-detail-chip">' + c + '</span>'; });
+        html += '</div>';
+      }
+    }
+  } else if (prefix === 'policy') {
+    const p = DATA.policies.find(x => x.id === rawId);
+    if (p) {
+      html += renderRatingBar(p);
+      html += '<p style="margin-bottom:4px"><span class="badge ' + (p.scope||'internal') + '">' + (p.scope||'internal') + '</span></p>';
+      if (p.description) html += '<p>' + esc(p.description) + '</p>';
+      const caps = (p.relatedCapabilities||[]).map(cId => { const c = DATA.capabilities.find(x=>x.id===cId); return c ? esc(c.title) : null; }).filter(Boolean);
+      const sks = (p.relatedSkills||[]).map(sId => { const sk = DATA.skills.find(x=>x.id===sId); return sk ? esc(sk.title) : null; }).filter(Boolean);
+      if (caps.length || sks.length) {
+        html += '<div class="fc-detail-chips">';
+        caps.forEach(c => { html += '<span class="fc-detail-chip">' + c + '</span>'; });
+        sks.forEach(s => { html += '<span class="fc-detail-chip">' + s + '</span>'; });
+        html += '</div>';
+      }
+    }
+  } else if (prefix === 'guardrail') {
+    const g = DATA.guardrails.find(x => x.id === rawId);
+    if (g) {
+      html += renderRatingBar(g);
+      html += '<p style="margin-bottom:4px"><span class="badge ' + (g.scope||'internal') + '">' + (g.scope||'internal') + '</span></p>';
+      if (g.description) html += '<p>' + esc(g.description) + '</p>';
+      const caps = (g.relatedCapabilities||[]).map(cId => { const c = DATA.capabilities.find(x=>x.id===cId); return c ? esc(c.title) : null; }).filter(Boolean);
+      const sks = (g.relatedSkills||[]).map(sId => { const sk = DATA.skills.find(x=>x.id===sId); return sk ? esc(sk.title) : null; }).filter(Boolean);
+      if (caps.length || sks.length) {
+        html += '<div class="fc-detail-chips">';
+        caps.forEach(c => { html += '<span class="fc-detail-chip">' + c + '</span>'; });
+        sks.forEach(s => { html += '<span class="fc-detail-chip">' + s + '</span>'; });
+        html += '</div>';
+      }
+    }
+  } else if (prefix === 'guideline') {
+    const g = DATA.guidelines.find(x => x.id === rawId);
+    if (g) {
+      html += renderRatingBar(g);
+      const items = g.items||[];
+      if (items.length) {
+        html += '<div class="fc-detail-chips">';
+        items.forEach(item => { html += '<span class="fc-detail-chip">' + esc(typeof item === 'string' ? item : item.title||item.id) + '</span>'; });
+        html += '</div>';
+      }
+      const depSkills = DATA.skills.filter(sk => (sk.knowledgeDeps||[]).includes(rawId));
+      if (depSkills.length) {
+        html += '<p style="margin-top:6px;font-size:11px;color:#94a3b8">Used by: ' + depSkills.map(sk => esc(sk.title)).join(', ') + '</p>';
+      }
+    }
+  }
   return html;
 }
 
@@ -1387,13 +1475,11 @@ function bindEvents() {
     el.addEventListener('click', () => {
       const id = el.dataset.flowExpand;
       mapExpandedCard = (mapExpandedCard === id) ? null : id;
+      const scroller = document.querySelector('.map-outer');
+      const scrollY = scroller ? scroller.scrollTop : 0;
       render();
-      if (mapExpandedCard) {
-        setTimeout(() => {
-          const card = document.querySelector('[data-flow-expand="' + mapExpandedCard + '"]');
-          if (card) card.scrollIntoView({behavior:'smooth',block:'nearest'});
-        }, 50);
-      }
+      const scroller2 = document.querySelector('.map-outer');
+      if (scroller2) scroller2.scrollTop = scrollY;
     });
   });
 }
