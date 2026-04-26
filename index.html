@@ -160,7 +160,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .map-flow-connector .connector-line{width:2px;height:12px;background:#cbd5e1}
 .map-flow-connector .connector-text{font-size:11px;color:#94a3b8;font-style:italic;padding:2px 0}
 /* View Controls */
-.view-controls{display:flex;align-items:center;gap:12px;padding:8px 32px;background:#fff;border-bottom:1px solid #e2e8f0;flex-shrink:0}
+.view-controls{display:flex;align-items:center;gap:12px;padding:6px 32px;background:#fff;border-bottom:1px solid #e2e8f0;flex-shrink:0}
+.compact-active .page-footer{display:none}
 .view-control-group{display:flex;align-items:center;gap:6px}
 .view-control-label{font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:.05em}
 .density-toggle{display:flex;gap:2px;background:#f1f5f9;padding:2px;border-radius:6px}
@@ -168,25 +169,26 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .density-btn:hover{color:#1a1a1a}
 .density-btn.active{background:#fff;color:#1a1a1a;box-shadow:0 1px 2px rgba(0,0,0,.08)}
 /* Compact mode overrides */
+.compact{padding:12px 16px 0}
 .compact .map-picker{max-width:100%}
-.compact .map-picker-title{font-size:18px;margin-bottom:2px}
-.compact .map-picker-subtitle{font-size:11px;margin-bottom:16px}
-.compact .map-picker-stages{gap:8px;margin-bottom:12px}
-.compact .map-picker-header{padding:4px 8px;font-size:9px;margin-bottom:4px;border-radius:4px}
-.compact .map-picker-card{padding:4px 8px 4px 12px;margin-bottom:3px;border-radius:4px}
-.compact .map-picker-card .pc-title{font-size:10px}
+.compact .map-picker-title{font-size:14px;margin-bottom:0}
+.compact .map-picker-subtitle{font-size:10px;margin-bottom:6px}
+.compact .map-picker-stages{gap:4px;margin-bottom:4px}
+.compact .map-picker-header{padding:2px 6px;font-size:8px;margin-bottom:2px;border-radius:3px}
+.compact .map-picker-card{padding:2px 6px 2px 10px;margin-bottom:2px;border-radius:3px}
+.compact .map-picker-card .pc-title{font-size:9px}
 .compact .map-picker-card .pc-domain{display:none}
-.compact .map-picker-card .pc-accent{width:3px}
-.compact .map-flow-connector{padding:2px 0}
-.compact .map-flow-connector .connector-line{height:6px}
-.compact .map-flow-connector .connector-text{font-size:9px}
-.compact .map-flow-band-label{font-size:8px;margin-bottom:4px;letter-spacing:.08em}
-.compact .map-flow-cards{gap:4px;padding:8px 10px;border-radius:6px;grid-template-columns:repeat(auto-fill,minmax(110px,1fr))}
-.compact .map-flow-card{padding:4px 8px;border-radius:4px}
-.compact .map-flow-card .fc-title{font-size:9px;line-height:1.2}
+.compact .map-picker-card .pc-accent{width:2px}
+.compact .map-flow-connector{padding:0}
+.compact .map-flow-connector .connector-line{height:3px}
+.compact .map-flow-connector .connector-text{font-size:8px;padding:0}
+.compact .map-flow-band-label{font-size:7px;margin-bottom:2px;letter-spacing:.08em}
+.compact .map-flow-cards{gap:3px;padding:4px 6px;border-radius:4px;grid-template-columns:repeat(auto-fill,minmax(100px,1fr))}
+.compact .map-flow-card{padding:2px 6px;border-radius:3px}
+.compact .map-flow-card .fc-title{font-size:8px;line-height:1.2}
 .compact .map-flow-card .fc-sub{display:none}
-.compact .map-flow-card.fc-gov-sub .fc-sub{display:block;font-size:8px;margin-top:1px;line-height:1.2}
-.compact .map-crosscut{padding-top:10px;margin-top:4px}
+.compact .map-flow-card.fc-gov-sub .fc-sub{display:block;font-size:7px;margin-top:0;line-height:1.1}
+.compact .map-crosscut{padding-top:4px;margin-top:2px}
 @media(max-width:960px){.map-picker-stages{grid-template-columns:repeat(3,1fr)}}
 @media(max-width:768px){.map-picker-stages{grid-template-columns:1fr 1fr}.map-crosscut-grid{grid-template-columns:1fr}.map-flow-cards{grid-template-columns:1fr}.map-outer{padding:16px}}
 @media(max-width:480px){.map-picker-stages{grid-template-columns:1fr}}
@@ -196,7 +198,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 <div id="app"></div>
 <script src="data.js"></script>
 <script>
-const VERSION = 'PA04';
+const VERSION = 'PA03';
 
 const PROCESS_DATA = {
   rows:[
@@ -369,6 +371,7 @@ function render() {
     body = '<div class="main">' + renderSidebar() + renderCanvas() + '</div>' + footer;
   }
   app.innerHTML = renderHeader() + body;
+  app.classList.toggle('compact-active', viewMode === 'map' && mapDensity === 'compact' && !mapSelectedCap);
   bindEvents();
 }
 
