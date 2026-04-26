@@ -159,6 +159,34 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .map-flow-connector{display:flex;flex-direction:column;align-items:center;padding:6px 0}
 .map-flow-connector .connector-line{width:2px;height:12px;background:#cbd5e1}
 .map-flow-connector .connector-text{font-size:11px;color:#94a3b8;font-style:italic;padding:2px 0}
+/* View Controls */
+.view-controls{display:flex;align-items:center;gap:12px;padding:8px 32px;background:#fff;border-bottom:1px solid #e2e8f0;flex-shrink:0}
+.view-control-group{display:flex;align-items:center;gap:6px}
+.view-control-label{font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:.05em}
+.density-toggle{display:flex;gap:2px;background:#f1f5f9;padding:2px;border-radius:6px}
+.density-btn{padding:4px 12px;border-radius:4px;border:none;background:transparent;font-size:11px;font-weight:600;color:#64748b;cursor:pointer;transition:all .15s}
+.density-btn:hover{color:#1a1a1a}
+.density-btn.active{background:#fff;color:#1a1a1a;box-shadow:0 1px 2px rgba(0,0,0,.08)}
+/* Compact mode overrides */
+.compact .map-picker{max-width:100%}
+.compact .map-picker-title{font-size:18px;margin-bottom:2px}
+.compact .map-picker-subtitle{font-size:11px;margin-bottom:16px}
+.compact .map-picker-stages{gap:8px;margin-bottom:12px}
+.compact .map-picker-header{padding:4px 8px;font-size:9px;margin-bottom:4px;border-radius:4px}
+.compact .map-picker-card{padding:4px 8px 4px 12px;margin-bottom:3px;border-radius:4px}
+.compact .map-picker-card .pc-title{font-size:10px}
+.compact .map-picker-card .pc-domain{display:none}
+.compact .map-picker-card .pc-accent{width:3px}
+.compact .map-flow-connector{padding:2px 0}
+.compact .map-flow-connector .connector-line{height:6px}
+.compact .map-flow-connector .connector-text{font-size:9px}
+.compact .map-flow-band-label{font-size:8px;margin-bottom:4px;letter-spacing:.08em}
+.compact .map-flow-cards{gap:4px;padding:8px 10px;border-radius:6px;grid-template-columns:repeat(auto-fill,minmax(110px,1fr))}
+.compact .map-flow-card{padding:4px 8px;border-radius:4px}
+.compact .map-flow-card .fc-title{font-size:9px;line-height:1.2}
+.compact .map-flow-card .fc-sub{display:none}
+.compact .map-flow-card.fc-gov-sub .fc-sub{display:block;font-size:8px;margin-top:1px;line-height:1.2}
+.compact .map-crosscut{padding-top:10px;margin-top:4px}
 @media(max-width:960px){.map-picker-stages{grid-template-columns:repeat(3,1fr)}}
 @media(max-width:768px){.map-picker-stages{grid-template-columns:1fr 1fr}.map-crosscut-grid{grid-template-columns:1fr}.map-flow-cards{grid-template-columns:1fr}.map-outer{padding:16px}}
 @media(max-width:480px){.map-picker-stages{grid-template-columns:1fr}}
@@ -260,6 +288,7 @@ let mapExpandedCard = null;
 let searchQuery = '';
 let searchActiveIdx = -1;
 let searchResults = [];
+let mapDensity = 'detailed'; // 'detailed' | 'compact'
 
 function buildSearchIndex() {
   const idx = [];
@@ -334,7 +363,8 @@ function render() {
   if (viewMode === 'process') {
     body = '<div class="main">' + renderProcessView() + '</div>' + footer;
   } else if (viewMode === 'map') {
-    body = renderMapView() + footer;
+    const controls = (!mapSelectedCap) ? renderViewControls() : '';
+    body = controls + renderMapView() + footer;
   } else {
     body = '<div class="main">' + renderSidebar() + renderCanvas() + '</div>' + footer;
   }
@@ -349,6 +379,19 @@ function renderHeader() {
   html += '<button class="tab-btn' + (viewMode === 'process' ? ' active' : '') + '" data-view="process">Process View</button>';
   html += '</div>';
   html += '<div class="header-logo"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 511.88 164.53"><path fill="#fff" d="M0,3.39h97.41v30.74h-63.51v32.77h55.6v28.02h-55.6v35.93h63.51v30.74H0V3.39Z"/><path fill="#fff" d="M109.16,18.76c0-10.17,8.14-18.76,18.53-18.76s18.98,8.59,18.98,18.76-8.59,18.76-18.98,18.76-18.53-8.36-18.53-18.76ZM111.64,49.49h32.54v112.09h-32.54V49.49Z"/><path fill="#fff" d="M155.26,105.54c0-34.13,24.86-58.99,54.92-58.99,15.14,0,28.25,6.1,36.16,17.63V3.39h32.54v158.2h-32.54v-14.69c-7.23,11.53-21.02,17.63-36.16,17.63-30.06,0-54.92-24.86-54.92-58.99ZM246.79,105.32c0-16.72-12.88-30.06-29.38-30.06s-29.15,13.33-29.15,30.28,12.88,30.28,29.15,30.28,29.38-13.56,29.38-30.51Z"/><path fill="#fff" d="M293.8,49.49h32.54v19.66c5.88-13.11,16.5-19.66,33-19.66h24.86v30.28h-27.35c-19.66,0-30.51,11.3-30.51,31.64v50.17h-32.54V49.49Z"/><path fill="#fff" d="M388.26,105.54c0-34.13,24.86-58.99,54.92-58.99,14.92,0,28.25,6.1,36.16,17.63v-14.69h32.54v112.09h-32.54v-14.69c-7.23,11.53-21.24,17.63-36.16,17.63-30.06,0-54.92-24.86-54.92-58.99ZM479.79,105.32c0-16.72-12.88-30.06-29.38-30.06s-29.15,13.33-29.15,30.28,12.88,30.28,29.15,30.28,29.38-13.56,29.38-30.51Z"/></svg></div>';
+  html += '</div>';
+  return html;
+}
+
+function renderViewControls() {
+  let html = '<div class="view-controls">';
+  html += '<div class="view-control-group">';
+  html += '<span class="view-control-label">Density</span>';
+  html += '<div class="density-toggle">';
+  html += '<button class="density-btn' + (mapDensity === 'detailed' ? ' active' : '') + '" data-density="detailed">Detailed</button>';
+  html += '<button class="density-btn' + (mapDensity === 'compact' ? ' active' : '') + '" data-density="compact">Compact</button>';
+  html += '</div>';
+  html += '</div>';
   html += '</div>';
   return html;
 }
@@ -886,9 +929,10 @@ function renderFlowBand(label, cards, bgColor) {
   return html;
 }
 
-function renderFlowCard(navId, title, subtitle) {
+function renderFlowCard(navId, title, subtitle, govSub) {
   const expanded = mapExpandedCard === navId;
-  let html = '<div class="map-flow-card' + (expanded ? ' fc-expanded' : '') + '" data-flow-expand="' + navId + '">';
+  const govClass = govSub ? ' fc-gov-sub' : '';
+  let html = '<div class="map-flow-card' + (expanded ? ' fc-expanded' : '') + govClass + '" data-flow-expand="' + navId + '">';
   html += '<div class="fc-title">' + esc(title) + '</div>';
   if (subtitle && !expanded) html += '<div class="fc-sub">' + esc(subtitle) + '</div>';
   if (expanded) {
@@ -997,7 +1041,8 @@ function renderCardDetail(id) {
 }
 
 function renderMapView() {
-  let html = '<div class="map-outer">';
+  const compactClass = (mapDensity === 'compact' && !mapSelectedCap) ? ' compact' : '';
+  let html = '<div class="map-outer' + compactClass + '">';
   if (mapSelectedCap) {
     html += renderMapFlow();
   } else {
@@ -1074,8 +1119,8 @@ function renderMapPicker() {
   const govCount = DATA.policies.length + DATA.guardrails.length;
   html += renderFlowConnector('adhere to');
   let govCards = '';
-  DATA.policies.forEach(p => { govCards += renderFlowCard('policy-' + p.id, p.title, 'Policy · ' + (p.scope||'internal')); });
-  DATA.guardrails.forEach(g => { govCards += renderFlowCard('guardrail-' + g.id, g.title, 'Guardrail · ' + (g.scope||'internal')); });
+  DATA.policies.forEach(p => { govCards += renderFlowCard('policy-' + p.id, p.title, 'Policy · ' + (p.scope||'internal'), true); });
+  DATA.guardrails.forEach(g => { govCards += renderFlowCard('guardrail-' + g.id, g.title, 'Guardrail · ' + (g.scope||'internal'), true); });
   html += renderFlowBand('Rules (' + govCount + ')', govCards, '#faf5ff');
 
   html += '</div>';
@@ -1242,6 +1287,9 @@ function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').repl
 function bindEvents() {
   document.querySelectorAll('[data-view]').forEach(el => {
     el.addEventListener('click', (e) => { e.preventDefault(); viewMode = el.dataset.view; render(); });
+  });
+  document.querySelectorAll('[data-density]').forEach(el => {
+    el.addEventListener('click', () => { mapDensity = el.dataset.density; render(); });
   });
   document.querySelectorAll('.sidebar-item').forEach(el => {
     el.addEventListener('click', () => { selectedId = el.dataset.id; render(); });
