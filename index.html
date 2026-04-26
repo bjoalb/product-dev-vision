@@ -976,100 +976,19 @@ function renderFlowCard(navId, title, subtitle, govSub) {
 }
 
 function renderCardDetail(id) {
+  const prev = selectedId;
+  selectedId = id;
   const prefix = id.split('-')[0];
-  const rawId = id.replace(/^[a-z]+-/, '');
   let html = '';
-  if (prefix === 'pb') {
-    const pb = DATA.playbooks.find(x => x.id === rawId);
-    if (pb) {
-      if (pb.description) html += '<p>' + esc(pb.description) + '</p>';
-      if (pb.phases && pb.phases.length) html += '<p style="margin-top:4px;color:#94a3b8;font-size:11px">' + esc(pb.phases.join(' \u2192 ')) + '</p>';
-      if (pb.aiAgents && pb.aiAgents.length) {
-        html += '<div class="fc-detail-chips">';
-        pb.aiAgents.forEach(aId => { const a = DATA.aiAgents.find(x=>x.id===aId); html += '<span class="fc-detail-chip">' + (a?esc(a.title):aId) + '</span>'; });
-        html += '</div>';
-      }
-    }
-  } else if (prefix === 'agent') {
-    const a = DATA.aiAgents.find(x => x.id === rawId);
-    if (a) {
-      if (a.subtitle) html += '<p>' + esc(a.subtitle) + '</p>';
-      if (a.definitionOfDone) html += '<p style="margin-top:4px;font-style:italic;color:#94a3b8">' + esc(a.definitionOfDone) + '</p>';
-      if (a.skillChain && a.skillChain.length) {
-        html += '<div class="fc-detail-chips">';
-        a.skillChain.slice(0,6).forEach(sId => { const sk = DATA.skills.find(x=>x.id===sId); html += '<span class="fc-detail-chip">' + (sk?esc(sk.title):sId) + '</span>'; });
-        if (a.skillChain.length > 6) html += '<span class="fc-detail-chip">+' + (a.skillChain.length-6) + ' more</span>';
-        html += '</div>';
-      }
-    }
-  } else if (prefix === 'skill') {
-    const sk = DATA.skills.find(x => x.id === rawId);
-    if (sk) {
-      if (sk.description) html += '<p>' + esc(sk.description) + '</p>';
-      const mat = sk.maturity || 'production';
-      html += '<p style="margin-top:4px"><span class="maturity-badge ' + mat + '">' + mat.replace('-',' ') + '</span></p>';
-      const kDeps = sk.knowledgeDeps||[];
-      if (kDeps.length) {
-        html += '<p style="margin-top:4px;font-size:11px;color:#94a3b8">Guidelines: ' + kDeps.map(kid => { const g = DATA.guidelines.find(x=>x.id===kid); return g ? esc(g.title) : kid; }).join(', ') + '</p>';
-      }
-    }
-  } else if (prefix === 'realtool') {
-    const t = DATA.realtools.find(x => x.id === rawId);
-    if (t) {
-      if (t.description) html += '<p>' + esc(t.description) + '</p>';
-      const chips = [];
-      (t.relatedSkills||[]).forEach(sId => { const sk = DATA.skills.find(x=>x.id===sId); if (sk) chips.push(esc(sk.title)); });
-      (t.relatedAgents||[]).forEach(aId => { const a = DATA.aiAgents.find(x=>x.id===aId); if (a) chips.push(esc(a.title)); });
-      if (chips.length) {
-        html += '<div class="fc-detail-chips">';
-        chips.forEach(c => { html += '<span class="fc-detail-chip">' + c + '</span>'; });
-        html += '</div>';
-      }
-    }
-  } else if (prefix === 'policy') {
-    const p = DATA.policies.find(x => x.id === rawId);
-    if (p) {
-      html += '<p style="margin-bottom:4px"><span class="badge ' + (p.scope||'internal') + '">' + (p.scope||'internal') + '</span></p>';
-      if (p.description) html += '<p>' + esc(p.description) + '</p>';
-      const caps = (p.relatedCapabilities||[]).map(cId => { const c = DATA.capabilities.find(x=>x.id===cId); return c ? esc(c.title) : null; }).filter(Boolean);
-      const sks = (p.relatedSkills||[]).map(sId => { const sk = DATA.skills.find(x=>x.id===sId); return sk ? esc(sk.title) : null; }).filter(Boolean);
-      if (caps.length || sks.length) {
-        html += '<div class="fc-detail-chips">';
-        caps.forEach(c => { html += '<span class="fc-detail-chip">' + c + '</span>'; });
-        sks.forEach(s => { html += '<span class="fc-detail-chip">' + s + '</span>'; });
-        html += '</div>';
-      }
-    }
-  } else if (prefix === 'guardrail') {
-    const g = DATA.guardrails.find(x => x.id === rawId);
-    if (g) {
-      html += '<p style="margin-bottom:4px"><span class="badge ' + (g.scope||'internal') + '">' + (g.scope||'internal') + '</span></p>';
-      if (g.description) html += '<p>' + esc(g.description) + '</p>';
-      const caps = (g.relatedCapabilities||[]).map(cId => { const c = DATA.capabilities.find(x=>x.id===cId); return c ? esc(c.title) : null; }).filter(Boolean);
-      const sks = (g.relatedSkills||[]).map(sId => { const sk = DATA.skills.find(x=>x.id===sId); return sk ? esc(sk.title) : null; }).filter(Boolean);
-      if (caps.length || sks.length) {
-        html += '<div class="fc-detail-chips">';
-        caps.forEach(c => { html += '<span class="fc-detail-chip">' + c + '</span>'; });
-        sks.forEach(s => { html += '<span class="fc-detail-chip">' + s + '</span>'; });
-        html += '</div>';
-      }
-    }
-  } else if (prefix === 'guideline') {
-    const g = DATA.guidelines.find(x => x.id === rawId);
-    if (g) {
-      const items = g.items||[];
-      if (items.length) {
-        html += '<div class="fc-detail-chips">';
-        items.forEach(item => { html += '<span class="fc-detail-chip">' + esc(typeof item === 'string' ? item : item.title||item.id) + '</span>'; });
-        html += '</div>';
-      }
-      // Show which skills depend on this guideline
-      const depSkills = DATA.skills.filter(sk => (sk.knowledgeDeps||[]).includes(rawId));
-      if (depSkills.length) {
-        html += '<p style="margin-top:6px;font-size:11px;color:#94a3b8">Used by: ' + depSkills.map(sk => esc(sk.title)).join(', ') + '</p>';
-      }
-    }
-  }
+  if (prefix === 'pb') html = renderPlaybook();
+  else if (prefix === 'agent') html = renderAIAgent();
+  else if (prefix === 'skill') html = renderSkill();
+  else if (prefix === 'realtool') html = renderRealTool();
+  else if (prefix === 'policy') html = renderPolicy();
+  else if (prefix === 'guardrail') html = renderGuardrail();
+  else if (prefix === 'guideline') html = renderGuideline();
+  else if (prefix === 'cap') html = renderCapability();
+  selectedId = prev;
   return html;
 }
 
@@ -1463,24 +1382,18 @@ function bindEvents() {
       searchQuery = ''; searchResults = []; searchActiveIdx = -1; render();
     }
   }, {once: true});
-  // Map: flow card click navigates to Functions Inventory detail
+  // Map: flow card inline expand toggle
   document.querySelectorAll('[data-flow-expand]').forEach(el => {
     el.addEventListener('click', () => {
       const id = el.dataset.flowExpand;
-      selectedId = id;
-      viewMode = 'studio';
-      const prefix = id.split('-')[0];
-      const catMap = {agent:'aiAgents',skill:'skills',guideline:'guidelines',pb:'playbooks',policy:'policies',guardrail:'guardrails',realtool:'realtools',infra:'orchestration',ka:'knowledgeAssets'};
-      if (catMap[prefix]) expandedCategories.add(catMap[prefix]);
-      if (prefix === 'cap') {
-        const cap = DATA.capabilities.find(c => c.id === id);
-        if (cap) expandedCategories.add('cap-' + cap.stage);
-      }
+      mapExpandedCard = (mapExpandedCard === id) ? null : id;
       render();
-      setTimeout(() => {
-        const sel = document.querySelector('.sidebar-item.selected');
-        if (sel) sel.scrollIntoView({behavior:'smooth',block:'nearest'});
-      }, 50);
+      if (mapExpandedCard) {
+        setTimeout(() => {
+          const card = document.querySelector('[data-flow-expand="' + mapExpandedCard + '"]');
+          if (card) card.scrollIntoView({behavior:'smooth',block:'nearest'});
+        }, 50);
+      }
     });
   });
 }
