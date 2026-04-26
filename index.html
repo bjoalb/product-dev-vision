@@ -868,7 +868,7 @@ function findItem(id) {
 }
 
 /* ── Architecture Map ── */
-const STAGE_COLORS = {discover:'#312e81',build:'#166534',run:'#0e7490',evolve:'#6b21a8',migrate:'#92400e',sunset:'#991b1b','cross-cutting':'#475569'};
+const STAGE_COLORS = {discover:'#1a1a1a',build:'#333333',run:'#4d4d4d',evolve:'#666666',migrate:'#808080',sunset:'#999999','cross-cutting':'#707070'};
 
 function buildFlowData(capId) {
   const cap = DATA.capabilities.find(c => c.id === capId);
@@ -1092,31 +1092,31 @@ function renderMapPicker() {
   html += renderFlowConnector('activate');
   let pbCards = '';
   DATA.playbooks.slice().sort((a,b) => a.title.localeCompare(b.title)).forEach(pb => { pbCards += renderFlowCard('pb-' + pb.id, (pb.icon||'') + ' ' + pb.title, pb.description ? (pb.description.length > 60 ? pb.description.slice(0,60) + '…' : pb.description) : null); });
-  html += renderFlowBand('Playbooks (' + DATA.playbooks.length + ')', pbCards, '#fff7ed');
+  html += renderFlowBand('Playbooks (' + DATA.playbooks.length + ')', pbCards, '#fff');
 
   // --- AI Agents ---
   html += renderFlowConnector('mobilize');
   let agentCards = '';
   DATA.aiAgents.slice().sort((a,b) => a.title.localeCompare(b.title)).forEach(a => { agentCards += renderFlowCard('agent-' + a.id, (a.icon||'') + ' ' + a.title, a.subtitle||null); });
-  html += renderFlowBand('AI Agents (' + DATA.aiAgents.length + ')', agentCards, '#fef3c7');
+  html += renderFlowBand('AI Agents (' + DATA.aiAgents.length + ')', agentCards, '#fff');
 
   // --- Skills ---
   html += renderFlowConnector('execute');
   let skillCards = '';
   DATA.skills.slice().sort((a,b) => a.title.localeCompare(b.title)).forEach(sk => { skillCards += renderFlowCard('skill-' + sk.id, (sk.icon||'') + ' ' + sk.title, sk.subtitle||null); });
-  html += renderFlowBand('Skills (' + DATA.skills.length + ')', skillCards, '#e0f2fe');
+  html += renderFlowBand('Skills (' + DATA.skills.length + ')', skillCards, '#fff');
 
   // --- Tools ---
   html += renderFlowConnector('use');
   let toolCards = '';
-  DATA.realtools.slice().sort((a,b) => a.title.localeCompare(b.title)).forEach(t => { toolCards += renderFlowCard('realtool-' + t.id, t.title, t.subtitle||null); });
-  html += renderFlowBand('Tools (' + DATA.realtools.length + ')', toolCards, '#ecfeff');
+  DATA.realtools.slice().sort((a,b) => a.title.localeCompare(b.title)).forEach(t => { toolCards += renderFlowCard('realtool-' + t.id, (t.icon||'') + ' ' + t.title, t.subtitle||null); });
+  html += renderFlowBand('Tools (' + DATA.realtools.length + ')', toolCards, '#fff');
 
   // --- Guidelines ---
   html += renderFlowConnector('follow');
   let guidelineCards = '';
   DATA.guidelines.slice().sort((a,b) => a.title.localeCompare(b.title)).forEach(g => { const items = g.items||[]; const preview = items.slice(0,3).map(i => typeof i === 'string' ? i : i.title||i.id).join(', ') + (items.length > 3 ? ' …' : ''); guidelineCards += renderFlowCard('guideline-' + g.id, (g.icon||'') + ' ' + g.title, preview || null); });
-  html += renderFlowBand('Guidelines (' + DATA.guidelines.length + ')', guidelineCards, '#f0fdf4');
+  html += renderFlowBand('Guidelines (' + DATA.guidelines.length + ')', guidelineCards, '#fff');
 
   // --- Rules ---
   const govCount = DATA.policies.length + DATA.guardrails.length;
@@ -1129,9 +1129,9 @@ function renderMapPicker() {
   allRules.forEach(({type, item}) => {
     const prefix = type === 'policy' ? 'policy-' : 'guardrail-';
     const typeLabel = type === 'policy' ? 'Policy' : 'Guardrail';
-    govCards += renderFlowCard(prefix + item.id, item.title, typeLabel + ' · ' + (item.scope||'internal'), true);
+    govCards += renderFlowCard(prefix + item.id, (item.icon||'') + ' ' + item.title, typeLabel + ' · ' + (item.scope||'internal'), true);
   });
-  html += renderFlowBand('Rules (' + govCount + ')', govCards, '#faf5ff');
+  html += renderFlowBand('Rules (' + govCount + ')', govCards, '#fff');
 
   html += '</div>';
   return html;
@@ -1164,7 +1164,7 @@ function renderMapFlow() {
     flow.playbooks.forEach(pb => {
       cards += renderFlowCard('pb-' + pb.id, (pb.icon||'') + ' ' + pb.title, pb.description ? (pb.description.length > 60 ? pb.description.slice(0,60) + '…' : pb.description) : null);
     });
-    html += renderFlowBand('Playbooks', cards, '#fff7ed');
+    html += renderFlowBand('Playbooks', cards, '#fff');
   }
 
   // 3. Agents
@@ -1174,7 +1174,7 @@ function renderMapFlow() {
     flow.agents.forEach(a => {
       cards += renderFlowCard('agent-' + a.id, (a.icon||'') + ' ' + a.title, a.subtitle||null);
     });
-    html += renderFlowBand('AI Agents', cards, '#fef3c7');
+    html += renderFlowBand('AI Agents', cards, '#fff');
   }
 
   // 4. Skills
@@ -1184,7 +1184,7 @@ function renderMapFlow() {
     flow.skills.forEach(sk => {
       cards += renderFlowCard('skill-' + sk.id, (sk.icon||'') + ' ' + sk.title, sk.subtitle||null);
     });
-    html += renderFlowBand('Skills', cards, '#e0f2fe');
+    html += renderFlowBand('Skills', cards, '#fff');
   }
 
   // 5. Tools
@@ -1192,9 +1192,9 @@ function renderMapFlow() {
     html += renderFlowConnector('use');
     let cards = '';
     flow.tools.forEach(t => {
-      cards += renderFlowCard('realtool-' + t.id, t.title, t.subtitle||null);
+      cards += renderFlowCard('realtool-' + t.id, (t.icon||'') + ' ' + t.title, t.subtitle||null);
     });
-    html += renderFlowBand('Tools', cards, '#ecfeff');
+    html += renderFlowBand('Tools', cards, '#fff');
   }
 
   // 6. Guidelines
@@ -1206,7 +1206,7 @@ function renderMapFlow() {
       const preview = gitems.slice(0,3).map(i => typeof i === 'string' ? i : i.title||i.id).join(', ') + (gitems.length > 3 ? ' …' : '');
       cards += renderFlowCard('guideline-' + g.id, (g.icon||'') + ' ' + g.title, preview || null);
     });
-    html += renderFlowBand('Guidelines', cards, '#f0fdf4');
+    html += renderFlowBand('Guidelines', cards, '#fff');
   }
 
   // 7. Rules
@@ -1216,9 +1216,9 @@ function renderMapFlow() {
     flow.governance.forEach(({type, item}) => {
       const prefix = type === 'policy' ? 'policy-' : 'guardrail-';
       const typeLabel = type === 'policy' ? 'Policy' : 'Guardrail';
-      cards += renderFlowCard(prefix + item.id, item.title, typeLabel + ' · ' + (item.scope||'internal'));
+      cards += renderFlowCard(prefix + item.id, (item.icon||'') + ' ' + item.title, typeLabel + ' · ' + (item.scope||'internal'));
     });
-    html += renderFlowBand('Rules', cards, '#faf5ff');
+    html += renderFlowBand('Rules', cards, '#fff');
   }
 
   html += '</div>';
