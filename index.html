@@ -192,6 +192,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 @media(max-width:960px){.map-picker-stages{grid-template-columns:repeat(3,1fr)}}
 @media(max-width:768px){.map-picker-stages{grid-template-columns:1fr 1fr}.map-crosscut-grid{grid-template-columns:1fr}.map-flow-cards{grid-template-columns:1fr}.map-outer{padding:16px}}
 @media(max-width:480px){.map-picker-stages{grid-template-columns:1fr}}
+/* Rating Bar */
+.rating-bar{display:flex;gap:16px;margin:8px 0 16px;padding:10px 14px;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0}
+.rating-item{display:flex;align-items:center;gap:6px;font-size:12px;color:#475569}
+.rating-label{font-weight:600;color:#64748b;text-transform:uppercase;font-size:10px;letter-spacing:.04em}
+.rating-dots{display:flex;gap:3px}
+.rating-dot{width:8px;height:8px;border-radius:50%;background:#e2e8f0;transition:background .15s}
+.rating-dot.filled{background:#1a1a1a}
+.rating-value{font-weight:700;font-size:11px;color:#1a1a1a;min-width:14px;text-align:right}
 </style>
 </head>
 <body>
@@ -498,6 +506,20 @@ function countDeps(id) {
   return DATA.edges.filter(e => e.from === id || e.to === id).length;
 }
 
+function renderRatingBar(item) {
+  if (!item || !item.feasibility) return '';
+  function dots(val) {
+    let h = '';
+    for (let i = 1; i <= 5; i++) h += '<span class="rating-dot' + (i <= val ? ' filled' : '') + '"></span>';
+    return h;
+  }
+  return '<div class="rating-bar">'
+    + '<div class="rating-item"><span class="rating-label">Feasibility</span><div class="rating-dots">' + dots(item.feasibility) + '</div><span class="rating-value">' + item.feasibility + '</span></div>'
+    + '<div class="rating-item"><span class="rating-label">Effort</span><div class="rating-dots">' + dots(item.effort) + '</div><span class="rating-value">' + item.effort + '</span></div>'
+    + '<div class="rating-item"><span class="rating-label">Impact</span><div class="rating-dots">' + dots(item.impact) + '</div><span class="rating-value">' + item.impact + '</span></div>'
+    + '</div>';
+}
+
 function renderCanvas() {
   let html = '<div class="canvas">';
   html += renderSearchBar();
@@ -526,6 +548,7 @@ function renderCapability() {
   const cap = DATA.capabilities.find(x => x.id === selectedId);
   if (!cap) return '';
   let html = '<h2>' + esc(cap.title) + '</h2>';
+  html += renderRatingBar(cap);
   html += '<div class="description">' + esc(cap.description) + '</div>';
   if (cap.playbooks.length) {
     html += '<div class="section-label">Playbooks (' + cap.playbooks.length + ')</div><div class="dep-list">';
@@ -584,6 +607,7 @@ function renderAIAgent() {
   const s = DATA.aiAgents.find(x => x.id === id);
   if (!s) return '';
   let html = '<h2>' + esc(s.title) + '</h2>';
+  html += renderRatingBar(s);
   html += '<div class="subtitle">' + esc(s.subtitle||'') + '</div>';
   if (s.definitionOfDone) html += '<div class="description"><strong>Definition of Done:</strong> ' + esc(s.definitionOfDone) + '</div>';
 
@@ -605,6 +629,7 @@ function renderSkill() {
   if (!t) return '';
   const mat = t.maturity || 'production';
   let html = '<h2>' + esc(t.title) + '<span class="maturity-badge ' + mat + '">' + mat.replace('-', ' ') + '</span></h2>';
+  html += renderRatingBar(t);
   html += '<div class="subtitle">' + esc(t.subtitle||'') + '</div>';
   if (t.description) html += '<div class="description">' + esc(t.description) + '</div>';
 
@@ -661,6 +686,7 @@ function renderGuideline() {
   const k = DATA.guidelines.find(x => x.id === id);
   if (!k) return '';
   let html = '<h2>' + esc(k.title) + '</h2>';
+  html += renderRatingBar(k);
   const items = k.items || [];
   if (items.length) {
     html += '<div class="section-label">Items (' + items.length + ')</div><div class="kb-items">';
@@ -675,6 +701,7 @@ function renderPolicy() {
   const p = DATA.policies.find(x => x.id === id);
   if (!p) return '';
   let html = '<h2>' + esc(p.title) + ' <span class="badge ' + p.scope + '">' + p.scope + '</span></h2>';
+  html += renderRatingBar(p);
   html += '<div class="subtitle">' + esc(p.subtitle||'') + '</div>';
   if (p.description) html += '<div class="description">' + esc(p.description) + '</div>';
   if (p.source) html += '<div class="section-label">Source</div><div class="description"><a href="' + esc(p.source) + '" target="_blank" rel="noopener">' + esc(p.source) + '</a></div>';
@@ -713,6 +740,7 @@ function renderGuardrail() {
   const g = DATA.guardrails.find(x => x.id === id);
   if (!g) return '';
   let html = '<h2>' + esc(g.title) + ' <span class="badge ' + g.scope + '">' + g.scope + '</span></h2>';
+  html += renderRatingBar(g);
   html += '<div class="subtitle">' + esc(g.subtitle||'') + '</div>';
   if (g.description) html += '<div class="description">' + esc(g.description) + '</div>';
   if (g.source) html += '<div class="section-label">Source</div><div class="description"><a href="' + esc(g.source) + '" target="_blank" rel="noopener">' + esc(g.source) + '</a></div>';
@@ -751,6 +779,7 @@ function renderRealTool() {
   const t = DATA.realtools.find(x => x.id === id);
   if (!t) return '';
   let html = '<h2>' + esc(t.title) + '</h2>';
+  html += renderRatingBar(t);
   html += '<div class="subtitle">' + esc(t.subtitle||'') + '</div>';
   if (t.description) html += '<div class="description">' + esc(t.description) + '</div>';
   const caps = t.relatedCapabilities || [];
@@ -806,6 +835,7 @@ function renderPlaybook() {
   const p = DATA.playbooks.find(x => x.id === id);
   if (!p) return '';
   let html = '<h2>' + esc(p.title) + '</h2>';
+  html += renderRatingBar(p);
   if (p.description) html += '<div class="description">' + esc(p.description) + '</div>';
 
   const agentIds = p.aiAgents || [];
